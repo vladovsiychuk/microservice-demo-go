@@ -12,7 +12,7 @@ type PostRouter struct {
 }
 
 type PostRequest struct {
-	Content   string `json:"content"`
+	Content   string `json:"content" binding:"required"`
 	IsPrivate bool   `json:"isPrivate"`
 }
 
@@ -33,7 +33,7 @@ func (h *PostRouter) RegisterRoutes(r *gin.Engine) {
 func (h *PostRouter) create(c *gin.Context) {
 	var req PostRequest
 
-	if err := c.BindJSON(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
