@@ -1,12 +1,18 @@
 package main
 
 import (
+	"embed"
+
 	"github.com/gin-gonic/gin"
+	"github.com/pressly/goose/v3"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/comment"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/post"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
+
+//go:embed migrations/*.sql
+var embedMigrations embed.FS
 
 func main() {
 	r := gin.Default()
@@ -15,6 +21,18 @@ func main() {
 	postgresDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
+	}
+
+	goose.SetBaseFS(embedMigrations)
+	if err := goose.SetDialect("postgres"); err != nil {
+		panic(err)
+	}
+	db, err := postgresDB.DB()
+	if err != nil {
+		panic(err)
+	}
+	if err := goose.Up(db, "migrations"); err != nil {
+		panic(err)
 	}
 
 	postService := post.NewService(postgresDB)
