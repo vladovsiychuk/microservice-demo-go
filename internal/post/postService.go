@@ -1,10 +1,15 @@
 package post
 
+import "gorm.io/gorm"
+
 type PostService struct {
+	postgresDB *gorm.DB
 }
 
-func NewService() *PostService {
-	return &PostService{}
+func NewService(postgresDB *gorm.DB) *PostService {
+	return &PostService{
+		postgresDB: postgresDB,
+	}
 }
 
 func (s *PostService) GetAllPosts() []string {
