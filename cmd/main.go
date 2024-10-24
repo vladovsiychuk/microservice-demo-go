@@ -23,6 +23,20 @@ func main() {
 		panic("failed to connect database")
 	}
 
+	dbMigration(postgresDB)
+
+	postService := post.NewService(postgresDB)
+	postHandler := post.NewRouter(postService)
+	postHandler.RegisterRoutes(r)
+
+	commentService := comment.NewService()
+	commentHandler := comment.NewRouter(commentService)
+	commentHandler.RegisterRoutes(r)
+
+	r.Run(":8080")
+}
+
+func dbMigration(postgresDB *gorm.DB) {
 	goose.SetBaseFS(embedMigrations)
 	if err := goose.SetDialect("postgres"); err != nil {
 		panic(err)
@@ -34,14 +48,4 @@ func main() {
 	if err := goose.Up(db, "migrations"); err != nil {
 		panic(err)
 	}
-
-	postService := post.NewService(postgresDB)
-	postHandler := post.NewRouter(postService)
-	postHandler.RegisterRoutes(r)
-
-	commentService := comment.NewService()
-	commentHandler := comment.NewRouter(commentService)
-	commentHandler.RegisterRoutes(r)
-
-	r.Run(":8080")
 }
