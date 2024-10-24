@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vladovsiychuk/microservice-demo-go/pkg/errors"
+	"github.com/vladovsiychuk/microservice-demo-go/pkg/customErrors"
 )
 
 type PostRouter struct {
@@ -40,7 +40,7 @@ func (h *PostRouter) create(c *gin.Context) {
 
 	post, err := h.service.CreatePost(req)
 	if err != nil {
-		statusCode, response := errors.HandleError(err)
+		statusCode, response := customErrors.HandleError(err)
 		c.JSON(statusCode, response)
 		return
 	}

@@ -1,6 +1,8 @@
 package post
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type PostService struct {
 	postgresDB *gorm.DB
@@ -20,6 +22,10 @@ func (s *PostService) CreatePost(req PostRequest) (*Post, error) {
 	post, err := CreatePost(req)
 	if err != nil {
 		return nil, err
+	}
+
+	if err := s.postgresDB.Create(post); err != nil {
+		return nil, err.Error
 	}
 
 	return post, nil

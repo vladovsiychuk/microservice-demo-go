@@ -2,7 +2,7 @@ package post
 
 import (
 	"github.com/google/uuid"
-	"github.com/vladovsiychuk/microservice-demo-go/pkg/errors"
+	"github.com/vladovsiychuk/microservice-demo-go/pkg/customErrors"
 )
 
 type Post struct {
@@ -13,7 +13,7 @@ type Post struct {
 
 func CreatePost(req PostRequest) (*Post, error) {
 	if len(req.Content) > 100 {
-		return nil, errors.NewBadRequestError("content exceeds 100 characters")
+		return nil, customErrors.NewBadRequestError("content exceeds 100 characters")
 	}
 
 	return &Post{
