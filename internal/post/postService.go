@@ -1,6 +1,8 @@
 package post
 
 import (
+	"errors"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -33,7 +35,7 @@ func (s *PostService) UpdatePost(postId uuid.UUID, req PostRequest) (*Post, erro
 	var post Post
 
 	if err := s.postgresDB.Take(&post, postId).Error; err != nil {
-		return nil, err
+		return nil, errors.New("Post not found")
 	}
 
 	if err := post.Update(req); err != nil {
