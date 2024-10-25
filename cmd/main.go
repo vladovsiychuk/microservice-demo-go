@@ -29,7 +29,7 @@ func main() {
 	postHandler := post.NewRouter(postService)
 	postHandler.RegisterRoutes(r)
 
-	commentService := comment.NewService()
+	commentService := comment.NewService(postgresDB, postService)
 	commentHandler := comment.NewRouter(commentService)
 	commentHandler.RegisterRoutes(r)
 

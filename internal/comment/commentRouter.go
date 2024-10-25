@@ -1,9 +1,19 @@
 package comment
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"github.com/vladovsiychuk/microservice-demo-go/pkg/customErrors"
+)
 
 type CommentRouter struct {
 	service *CommentService
+}
+
+type CommentRequest struct {
+	Content string `json:"content" binding:"required"`
 }
 
 func NewRouter(service *CommentService) *CommentRouter {
@@ -21,8 +31,28 @@ func (h *CommentRouter) RegisterRoutes(r *gin.Engine) {
 }
 
 func (h *CommentRouter) create(c *gin.Context) {
-	// posts := h.service.GetAllPosts()
-	// c.JSON(200, gin.H{"posts": posts})
+	var req CommentRequest
+	postIdStr := c.Param("postId")
+
+	postId, err := uuid.Parse(postIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID format"})
+		return
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	post, err := h.service.CreateComment(req, postId)
+	if err != nil {
+		statusCode, response := customErrors.HandleError(err)
+		c.JSON(statusCode, response)
+		return
+	}
+
+	c.JSON(http.StatusCreated, post)
 }
 
 func (h *CommentRouter) update(c *gin.Context) {

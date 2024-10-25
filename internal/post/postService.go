@@ -48,3 +48,13 @@ func (s *PostService) UpdatePost(postId uuid.UUID, req PostRequest) (*Post, erro
 
 	return &post, nil
 }
+
+func (s *PostService) IsPrivate(postId uuid.UUID) (bool, error) {
+	var post Post
+
+	if err := s.postgresDB.Take(&post, postId).Error; err != nil {
+		return false, errors.New("Post not found")
+	}
+
+	return post.IsPrivate, nil
+}
