@@ -24,8 +24,9 @@ func (s *PostService) CreatePost(req PostRequest) (*Post, error) {
 		return nil, err
 	}
 
-	if err := s.postgresDB.Create(post); err != nil {
-		return nil, err.Error
+	result := s.postgresDB.Create(post)
+	if result.Error != nil {
+		return nil, result.Error
 	}
 
 	return post, nil
