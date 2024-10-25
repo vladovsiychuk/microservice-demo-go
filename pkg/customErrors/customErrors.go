@@ -36,6 +36,6 @@ func HandleError(err error) (int, map[string]string) {
 	case *UnauthorizedError:
 		return http.StatusUnauthorized, map[string]string{"error": e.Error()}
 	default:
-		return http.StatusInternalServerError, map[string]string{"error": "something went wrong"}
+		return http.StatusInternalServerError, map[string]string{"error": "something went wrong: " + err.Error()}
 	}
 }

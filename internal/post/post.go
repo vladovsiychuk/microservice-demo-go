@@ -22,3 +22,9 @@ func CreatePost(req PostRequest) (*Post, error) {
 		req.IsPrivate,
 	}, nil
 }
+
+func (p *Post) Update(req PostRequest) error {
+	p.Content = req.Content
+	p.IsPrivate = req.IsPrivate
+	return nil
+}

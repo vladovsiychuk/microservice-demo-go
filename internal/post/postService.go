@@ -1,6 +1,7 @@
 package post
 
 import (
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -12,10 +13,6 @@ func NewService(postgresDB *gorm.DB) *PostService {
 	return &PostService{
 		postgresDB: postgresDB,
 	}
-}
-
-func (s *PostService) GetAllPosts() []string {
-	return []string{"Post 1", "Post 2"}
 }
 
 func (s *PostService) CreatePost(req PostRequest) (*Post, error) {
@@ -30,4 +27,22 @@ func (s *PostService) CreatePost(req PostRequest) (*Post, error) {
 	}
 
 	return post, nil
+}
+
+func (s *PostService) UpdatePost(postId uuid.UUID, req PostRequest) (*Post, error) {
+	var post Post
+
+	if err := s.postgresDB.Take(&post, postId).Error; err != nil {
+		return nil, err
+	}
+
+	if err := post.Update(req); err != nil {
+		return nil, err
+	}
+
+	if err := s.postgresDB.Save(&post).Error; err != nil {
+		return nil, err
+	}
+
+	return &post, nil
 }
