@@ -12,8 +12,8 @@ type Post struct {
 }
 
 func CreatePost(req PostRequest) (*Post, error) {
-	if len(req.Content) > 100 {
-		return nil, customErrors.NewBadRequestError("content exceeds 100 characters")
+	if len(req.Content) > 10 {
+		return nil, customErrors.NewBadRequestError("content exceeds 10 characters")
 	}
 
 	return &Post{
