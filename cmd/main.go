@@ -35,7 +35,7 @@ func main() {
 
 	setupDbMigration(postgresDB)
 
-	postService := post.NewService(postgresDB)
+	postService := post.NewService(postgresDB, eventBus)
 	postHandler := post.NewRouter(postService)
 	postHandler.RegisterRoutes(r)
 
