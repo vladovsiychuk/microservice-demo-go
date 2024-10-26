@@ -20,13 +20,16 @@ func main() {
 	r := gin.Default()
 
 	eventBus := eventbus.NewEventBus()
+
 	userRegisteredChan := make(chan eventbus.Event)
-	userRegisteredChan2 := make(chan eventbus.Event)
 	eventBus.Subscribe("UserRegistered", userRegisteredChan)
-	eventBus.Subscribe("UserRegistered", userRegisteredChan2)
 	go backendtofrontend.UserRegisteredHandler(userRegisteredChan)
+
+	userRegisteredChan2 := make(chan eventbus.Event)
+	eventBus.Subscribe("UserRegistered", userRegisteredChan2)
 	go backendtofrontend.UserRegisteredHandler2(userRegisteredChan2)
 
+	// setup postgres DB
 	dsn := "host=localhost user=root password=rootpassword dbname=postgres port=5432 sslmode=disable"
 	postgresDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
