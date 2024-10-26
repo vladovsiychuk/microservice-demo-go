@@ -1,6 +1,7 @@
 package comment
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -47,4 +48,28 @@ func (s *CommentService) CreateComment(req CommentRequest, postId uuid.UUID) (*C
 	})
 
 	return comment, nil
+}
+
+func (s *CommentService) UpdateComment(req CommentRequest, commentId uuid.UUID) (*Comment, error) {
+	var comment Comment
+
+	if err := s.postgresDB.Take(&comment, commentId).Error; err != nil {
+		return nil, errors.New("Comment not found")
+	}
+
+	if err := comment.Update(req); err != nil {
+		return nil, err
+	}
+
+	if err := s.postgresDB.Save(&comment).Error; err != nil {
+		return nil, err
+	}
+
+	s.eventBus.Publish(eventbus.Event{
+		Type:      shared.CommentUpdatedEventType,
+		Timestamp: time.Now(),
+		Data:      &comment,
+	})
+
+	return &comment, nil
 }

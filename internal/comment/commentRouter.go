@@ -23,10 +23,10 @@ func NewRouter(service *CommentService) *CommentRouter {
 }
 
 func (h *CommentRouter) RegisterRoutes(r *gin.Engine) {
-	postGroup := r.Group("v1/posts/:postId/comment")
+	postGroup := r.Group("v1/posts/:postId/comments")
 	{
 		postGroup.POST("/", h.create)
-		postGroup.PUT("/", h.update)
+		postGroup.PUT("/:commentId", h.update)
 	}
 }
 
@@ -45,25 +45,37 @@ func (h *CommentRouter) create(c *gin.Context) {
 		return
 	}
 
-	post, err := h.service.CreateComment(req, postId)
+	comment, err := h.service.CreateComment(req, postId)
 	if err != nil {
 		statusCode, response := customErrors.HandleError(err)
 		c.JSON(statusCode, response)
 		return
 	}
 
-	c.JSON(http.StatusCreated, post)
+	c.JSON(http.StatusCreated, comment)
 }
 
 func (h *CommentRouter) update(c *gin.Context) {
-	var newPost struct {
-		Content string `json:"content"`
-	}
-	if err := c.ShouldBindJSON(&newPost); err != nil {
-		c.JSON(400, gin.H{"error": "Invalid input"})
+	var req CommentRequest
+	commentIdStr := c.Param("commentId")
+
+	commentId, err := uuid.Parse(commentIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid comment ID format"})
 		return
 	}
 
-	// post := h.service.CreatePost(newPost.Content)
-	// c.JSON(201, gin.H{"message": post})
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	comment, err := h.service.UpdateComment(req, commentId)
+	if err != nil {
+		statusCode, response := customErrors.HandleError(err)
+		c.JSON(statusCode, response)
+		return
+	}
+
+	c.JSON(http.StatusOK, comment)
 }
