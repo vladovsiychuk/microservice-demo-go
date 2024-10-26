@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/shared"
-	eventbus "github.com/vladovsiychuk/microservice-demo-go/pkg/eventBus"
+	eventbus "github.com/vladovsiychuk/microservice-demo-go/pkg/event-bus"
 	"gorm.io/gorm"
 )
 

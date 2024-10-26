@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/vladovsiychuk/microservice-demo-go/pkg/customErrors"
+	customErrors "github.com/vladovsiychuk/microservice-demo-go/pkg/custom-errors"
 )
 
 type PostRouter struct {

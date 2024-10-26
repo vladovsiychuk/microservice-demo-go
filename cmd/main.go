@@ -5,11 +5,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pressly/goose/v3"
-	backendtofrontend "github.com/vladovsiychuk/microservice-demo-go/internal/backendToFrontend"
+	backendtofrontend "github.com/vladovsiychuk/microservice-demo-go/internal/backend-to-frontend"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/comment"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/post"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/shared"
-	eventbus "github.com/vladovsiychuk/microservice-demo-go/pkg/eventBus"
+	eventbus "github.com/vladovsiychuk/microservice-demo-go/pkg/event-bus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

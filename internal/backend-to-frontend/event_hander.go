@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/vladovsiychuk/microservice-demo-go/internal/comment"
-	eventbus "github.com/vladovsiychuk/microservice-demo-go/pkg/eventBus"
+	eventbus "github.com/vladovsiychuk/microservice-demo-go/pkg/event-bus"
 )
 
 func CommentCreatedHandler(eventChan <-chan eventbus.Event) {

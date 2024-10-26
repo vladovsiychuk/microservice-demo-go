@@ -2,7 +2,7 @@ package post
 
 import (
 	"github.com/google/uuid"
-	"github.com/vladovsiychuk/microservice-demo-go/pkg/customErrors"
+	customErrors "github.com/vladovsiychuk/microservice-demo-go/pkg/custom-errors"
 )
 
 type Post struct {
