@@ -8,6 +8,7 @@ import (
 	backendtofrontend "github.com/vladovsiychuk/microservice-demo-go/internal/backendToFrontend"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/comment"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/post"
+	"github.com/vladovsiychuk/microservice-demo-go/internal/shared"
 	eventbus "github.com/vladovsiychuk/microservice-demo-go/pkg/eventBus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -21,13 +22,9 @@ func main() {
 
 	eventBus := eventbus.NewEventBus()
 
-	userRegisteredChan := make(chan eventbus.Event)
-	eventBus.Subscribe("UserRegistered", userRegisteredChan)
-	go backendtofrontend.UserRegisteredHandler(userRegisteredChan)
-
-	userRegisteredChan2 := make(chan eventbus.Event)
-	eventBus.Subscribe("UserRegistered", userRegisteredChan2)
-	go backendtofrontend.UserRegisteredHandler2(userRegisteredChan2)
+	commentCreatedChan := make(chan eventbus.Event)
+	eventBus.Subscribe(shared.CommentCreatedEventType, commentCreatedChan)
+	go backendtofrontend.CommentCreatedHandler(commentCreatedChan)
 
 	// setup postgres DB
 	dsn := "host=localhost user=root password=rootpassword dbname=postgres port=5432 sslmode=disable"

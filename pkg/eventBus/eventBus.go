@@ -10,12 +10,6 @@ type Event struct {
 	Data      interface{}
 }
 
-type UserRegisteredEvent struct {
-	ID    int
-	Name  string
-	Email string
-}
-
 type EventBus struct {
 	subscribers map[string][]chan<- Event
 }

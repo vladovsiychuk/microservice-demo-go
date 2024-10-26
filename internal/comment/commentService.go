@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/post"
+	"github.com/vladovsiychuk/microservice-demo-go/internal/shared"
 	eventbus "github.com/vladovsiychuk/microservice-demo-go/pkg/eventBus"
 	"gorm.io/gorm"
 )
@@ -39,17 +40,11 @@ func (s *CommentService) CreateComment(req CommentRequest, postId uuid.UUID) (*C
 		return nil, result.Error
 	}
 
-	event := eventbus.Event{
-		Type:      "UserRegistered",
+	s.eventBus.Publish(eventbus.Event{
+		Type:      shared.CommentCreatedEventType,
 		Timestamp: time.Now(),
-		Data: eventbus.UserRegisteredEvent{
-			ID:    1,
-			Name:  "sdf",
-			Email: "sdfs",
-		},
-	}
-
-	s.eventBus.Publish(event)
+		Data:      comment,
+	})
 
 	return comment, nil
 }
