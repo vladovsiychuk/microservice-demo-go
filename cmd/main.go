@@ -5,8 +5,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pressly/goose/v3"
+	backendtofrontend "github.com/vladovsiychuk/microservice-demo-go/internal/backendToFrontend"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/comment"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/post"
+	eventbus "github.com/vladovsiychuk/microservice-demo-go/pkg/eventBus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -17,26 +19,34 @@ var embedMigrations embed.FS
 func main() {
 	r := gin.Default()
 
+	eventBus := eventbus.NewEventBus()
+	userRegisteredChan := make(chan eventbus.Event)
+	userRegisteredChan2 := make(chan eventbus.Event)
+	eventBus.Subscribe("UserRegistered", userRegisteredChan)
+	eventBus.Subscribe("UserRegistered", userRegisteredChan2)
+	go backendtofrontend.UserRegisteredHandler(userRegisteredChan)
+	go backendtofrontend.UserRegisteredHandler2(userRegisteredChan2)
+
 	dsn := "host=localhost user=root password=rootpassword dbname=postgres port=5432 sslmode=disable"
 	postgresDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
 
-	dbMigration(postgresDB)
+	setupDbMigration(postgresDB)
 
 	postService := post.NewService(postgresDB)
 	postHandler := post.NewRouter(postService)
 	postHandler.RegisterRoutes(r)
 
-	commentService := comment.NewService(postgresDB, postService)
+	commentService := comment.NewService(postgresDB, postService, eventBus)
 	commentHandler := comment.NewRouter(commentService)
 	commentHandler.RegisterRoutes(r)
 
 	r.Run(":8080")
 }
 
-func dbMigration(postgresDB *gorm.DB) {
+func setupDbMigration(postgresDB *gorm.DB) {
 	goose.SetBaseFS(embedMigrations)
 	if err := goose.SetDialect("postgres"); err != nil {
 		panic(err)
