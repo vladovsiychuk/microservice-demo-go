@@ -20,12 +20,6 @@ var embedMigrations embed.FS
 func main() {
 	r := gin.Default()
 
-	eventBus := eventbus.NewEventBus()
-
-	commentCreatedChan := make(chan eventbus.Event)
-	eventBus.Subscribe(shared.CommentCreatedEventType, commentCreatedChan)
-	go backendtofrontend.CommentCreatedHandler(commentCreatedChan)
-
 	// setup postgres DB
 	dsn := "host=localhost user=root password=rootpassword dbname=postgres port=5432 sslmode=disable"
 	postgresDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -33,19 +27,31 @@ func main() {
 		panic("failed to connect database")
 	}
 
+	eventBus := eventbus.NewEventBus()
+
+	setupSubscribers(eventBus)
 	setupDbMigration(postgresDB)
+	injectDependencies(postgresDB, eventBus, r)
 
+	r.Run(":8080")
+}
+
+func setupSubscribers(eventBus *eventbus.EventBus) {
+	commentCreatedChan := make(chan eventbus.Event)
+	eventBus.Subscribe(shared.CommentCreatedEventType, commentCreatedChan)
+	go backendtofrontend.CommentCreatedHandler(commentCreatedChan)
+}
+
+func injectDependencies(postgresDB *gorm.DB, eventBus *eventbus.EventBus, r *gin.Engine) {
 	postRepository := post.NewPostRepository(postgresDB)
-
 	postService := post.NewService(postRepository, eventBus)
 	postHandler := post.NewRouter(postService)
 	postHandler.RegisterRoutes(r)
 
-	commentService := comment.NewService(postgresDB, postService, eventBus)
+	commentRepository := comment.NewCommentRepository(postgresDB)
+	commentService := comment.NewService(commentRepository, postService, eventBus)
 	commentHandler := comment.NewRouter(commentService)
 	commentHandler.RegisterRoutes(r)
-
-	r.Run(":8080")
 }
 
 func setupDbMigration(postgresDB *gorm.DB) {
