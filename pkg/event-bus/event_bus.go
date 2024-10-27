@@ -14,6 +14,10 @@ type EventBus struct {
 	subscribers map[string][]chan<- Event
 }
 
+type EventBusI interface {
+	Publish(event Event)
+}
+
 func NewEventBus() *EventBus {
 	return &EventBus{
 		subscribers: make(map[string][]chan<- Event),

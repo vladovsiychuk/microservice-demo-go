@@ -7,17 +7,16 @@ import (
 	"github.com/google/uuid"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/shared"
 	eventbus "github.com/vladovsiychuk/microservice-demo-go/pkg/event-bus"
-	"gorm.io/gorm"
 )
 
 type PostService struct {
-	postgresDB *gorm.DB
-	eventBus   *eventbus.EventBus
+	repository PostRepositoryI
+	eventBus   eventbus.EventBusI
 }
 
-func NewService(postgresDB *gorm.DB, eventBus *eventbus.EventBus) *PostService {
+func NewService(repository PostRepositoryI, eventBus eventbus.EventBusI) *PostService {
 	return &PostService{
-		postgresDB: postgresDB,
+		repository: repository,
 		eventBus:   eventBus,
 	}
 }
@@ -28,9 +27,8 @@ func (s *PostService) CreatePost(req PostRequest) (*Post, error) {
 		return nil, err
 	}
 
-	result := s.postgresDB.Create(post)
-	if result.Error != nil {
-		return nil, result.Error
+	if err := s.repository.Create(post); err != nil {
+		return nil, err
 	}
 
 	s.eventBus.Publish(eventbus.Event{
@@ -45,7 +43,7 @@ func (s *PostService) CreatePost(req PostRequest) (*Post, error) {
 func (s *PostService) UpdatePost(postId uuid.UUID, req PostRequest) (*Post, error) {
 	var post Post
 
-	if err := s.postgresDB.Take(&post, postId).Error; err != nil {
+	if err := s.repository.FindByKey(&post, postId); err != nil {
 		return nil, errors.New("Post not found")
 	}
 
@@ -53,7 +51,7 @@ func (s *PostService) UpdatePost(postId uuid.UUID, req PostRequest) (*Post, erro
 		return nil, err
 	}
 
-	if err := s.postgresDB.Save(&post).Error; err != nil {
+	if err := s.repository.Update(&post); err != nil {
 		return nil, err
 	}
 
@@ -69,7 +67,7 @@ func (s *PostService) UpdatePost(postId uuid.UUID, req PostRequest) (*Post, erro
 func (s *PostService) IsPrivate(postId uuid.UUID) (bool, error) {
 	var post Post
 
-	if err := s.postgresDB.Take(&post, postId).Error; err != nil {
+	if err := s.repository.FindByKey(&post, postId); err != nil {
 		return false, errors.New("Post not found")
 	}
 
