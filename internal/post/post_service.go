@@ -14,10 +14,6 @@ type PostService struct {
 	eventBus   eventbus.EventBusI
 }
 
-type PostServiceI interface {
-	IsPrivate(postId uuid.UUID) (bool, error)
-}
-
 func NewService(repository PostRepositoryI, eventBus eventbus.EventBusI) *PostService {
 	return &PostService{
 		repository: repository,

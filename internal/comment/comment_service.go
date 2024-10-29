@@ -5,20 +5,19 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/vladovsiychuk/microservice-demo-go/internal/post"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/shared"
 	eventbus "github.com/vladovsiychuk/microservice-demo-go/pkg/event-bus"
 )
 
 type CommentService struct {
 	repository  CommentRepositoryI
-	postService post.PostServiceI
+	postService shared.PostServiceI
 	eventBus    eventbus.EventBusI
 }
 
 func NewService(
 	repository CommentRepositoryI,
-	postService post.PostServiceI,
+	postService shared.PostServiceI,
 	eventBus eventbus.EventBusI,
 ) *CommentService {
 	return &CommentService{
