@@ -30,11 +30,11 @@ func TestCreatePost(t *testing.T) {
 		{
 			name: "Success",
 			setupMocks: func() {
-				repository.On("Create", mock.Anything).Return(nil).Once()
-				eventbus.On("Publish", mock.Anything)
 				post.CreatePost = func(req post.PostRequest) (*post.Post, error) {
 					return anyPost, nil
 				}
+				repository.On("Create", mock.Anything).Return(nil).Once()
+				eventbus.On("Publish", mock.Anything)
 			},
 			expectedError: nil,
 		},
@@ -50,10 +50,10 @@ func TestCreatePost(t *testing.T) {
 		{
 			name: "With DB error",
 			setupMocks: func() {
-				repository.On("Create", mock.Anything).Return(errFoo).Once()
 				post.CreatePost = func(req post.PostRequest) (*post.Post, error) {
 					return anyPost, nil
 				}
+				repository.On("Create", mock.Anything).Return(errFoo).Once()
 			},
 			expectedError: errFoo,
 		},
