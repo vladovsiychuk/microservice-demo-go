@@ -11,7 +11,7 @@ type Post struct {
 	IsPrivate bool      `json:"isPrivate"`
 }
 
-func CreatePost(req PostRequest) (*Post, error) {
+var CreatePost = func(req PostRequest) (*Post, error) {
 	if len(req.Content) > 10 {
 		return nil, customErrors.NewBadRequestError("content exceeds 10 characters")
 	}

@@ -11,12 +11,16 @@ import (
 )
 
 var anyValidPostRequest = post.PostRequest{Content: "foo", IsPrivate: false}
+var anyPost, _ = post.CreatePost(anyValidPostRequest)
 var errFoo = errors.New("Error")
 
 func TestCreatePost(t *testing.T) {
 	repository := mocks.NewPostRepositoryI(t)
 	eventbus := mocks.NewEventBusI(t)
 	service := post.NewService(repository, eventbus)
+
+	originalCreatePostModel := post.CreatePost
+	defer func() { post.CreatePost = originalCreatePostModel }()
 
 	tests := []struct {
 		name          string
@@ -28,6 +32,9 @@ func TestCreatePost(t *testing.T) {
 			setupMocks: func() {
 				repository.On("Create", mock.Anything).Return(nil).Once()
 				eventbus.On("Publish", mock.Anything)
+				post.CreatePost = func(req post.PostRequest) (*post.Post, error) {
+					return anyPost, nil
+				}
 			},
 			expectedError: nil,
 		},
@@ -35,6 +42,9 @@ func TestCreatePost(t *testing.T) {
 			name: "With DB error",
 			setupMocks: func() {
 				repository.On("Create", mock.Anything).Return(errFoo).Once()
+				post.CreatePost = func(req post.PostRequest) (*post.Post, error) {
+					return anyPost, nil
+				}
 			},
 			expectedError: errFoo,
 		},
