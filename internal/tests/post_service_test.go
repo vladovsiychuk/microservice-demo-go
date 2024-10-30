@@ -10,30 +10,51 @@ import (
 	"github.com/vladovsiychuk/microservice-demo-go/mocks"
 )
 
-func TestCreatePostSuccess(t *testing.T) {
+var anyValidPostRequest = post.PostRequest{Content: "foo", IsPrivate: false}
+var errFoo = errors.New("Error")
+
+func TestCreatePost(t *testing.T) {
 	repository := mocks.NewPostRepositoryI(t)
 	eventbus := mocks.NewEventBusI(t)
-
-	repository.On("Create", mock.Anything).Return(nil).Once()
-	eventbus.On("Publish", mock.Anything)
-
 	service := post.NewService(repository, eventbus)
-	response, err := service.CreatePost(post.PostRequest{Content: "foo", IsPrivate: false})
 
-	assert.Equal(t, err, nil)
-	assert.NotNil(t, response)
+	tests := []struct {
+		name          string
+		setupMocks    func()
+		expectedError error
+	}{
+		{
+			name: "Success",
+			setupMocks: func() {
+				repository.On("Create", mock.Anything).Return(nil).Once()
+				eventbus.On("Publish", mock.Anything)
+			},
+			expectedError: nil,
+		},
+		{
+			name: "With DB error",
+			setupMocks: func() {
+				repository.On("Create", mock.Anything).Return(errFoo).Once()
+			},
+			expectedError: errFoo,
+		},
+	}
 
-	repository.AssertExpectations(t)
-}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.setupMocks()
 
-func TestCreatePostFail(t *testing.T) {
-	repository := mocks.NewPostRepositoryI(t)
-	eventbus := mocks.NewEventBusI(t)
+			response, err := service.CreatePost(anyValidPostRequest)
 
-	repository.On("Create", mock.Anything).Return(errors.New("Error")).Once()
+			assert.Equal(t, tt.expectedError, err)
+			if tt.expectedError != nil {
+				assert.Nil(t, response)
+			} else {
+				assert.NotNil(t, response)
+			}
 
-	service := post.NewService(repository, eventbus)
-	_, err := service.CreatePost(post.PostRequest{Content: "foo", IsPrivate: false})
-
-	assert.Equal(t, err, errors.New("Error"))
+			repository.AssertExpectations(t)
+			eventbus.AssertExpectations(t)
+		})
+	}
 }
