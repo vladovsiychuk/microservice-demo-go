@@ -39,6 +39,15 @@ func TestCreatePost(t *testing.T) {
 			expectedError: nil,
 		},
 		{
+			name: "With Model Error",
+			setupMocks: func() {
+				post.CreatePost = func(req post.PostRequest) (*post.Post, error) {
+					return nil, errFoo
+				}
+			},
+			expectedError: errFoo,
+		},
+		{
 			name: "With DB error",
 			setupMocks: func() {
 				repository.On("Create", mock.Anything).Return(errFoo).Once()
