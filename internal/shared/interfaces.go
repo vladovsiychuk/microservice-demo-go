@@ -4,6 +4,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type PostServiceI interface {
+type PostServiceSharedI interface {
 	IsPrivate(postId uuid.UUID) (bool, error)
 }

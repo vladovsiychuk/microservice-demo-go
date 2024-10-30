@@ -11,13 +11,13 @@ import (
 
 type CommentService struct {
 	repository  CommentRepositoryI
-	postService shared.PostServiceI
+	postService shared.PostServiceSharedI
 	eventBus    eventbus.EventBusI
 }
 
 func NewService(
 	repository CommentRepositoryI,
-	postService shared.PostServiceI,
+	postService shared.PostServiceSharedI,
 	eventBus eventbus.EventBusI,
 ) *CommentService {
 	return &CommentService{

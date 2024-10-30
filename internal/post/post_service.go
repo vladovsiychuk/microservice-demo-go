@@ -14,7 +14,7 @@ type PostService struct {
 	eventBus   eventbus.EventBusI
 }
 
-type PostServiceInternalI interface {
+type PostServiceI interface {
 	CreatePost(req PostRequest) (*Post, error)
 	UpdatePost(postId uuid.UUID, req PostRequest) (*Post, error)
 }

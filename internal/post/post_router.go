@@ -9,7 +9,7 @@ import (
 )
 
 type PostRouter struct {
-	service PostServiceInternalI
+	service PostServiceI
 }
 
 type PostRequest struct {
@@ -17,7 +17,7 @@ type PostRequest struct {
 	IsPrivate bool   `json:"isPrivate"`
 }
 
-func NewRouter(service PostServiceInternalI) *PostRouter {
+func NewRouter(service PostServiceI) *PostRouter {
 	return &PostRouter{
 		service: service,
 	}
