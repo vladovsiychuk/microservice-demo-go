@@ -14,6 +14,11 @@ type PostService struct {
 	eventBus   eventbus.EventBusI
 }
 
+type PostServiceI interface {
+	CreatePost(req PostRequest) (*Post, error)
+	UpdatePost(postId uuid.UUID, req PostRequest) (*Post, error)
+}
+
 func NewService(repository PostRepositoryI, eventBus eventbus.EventBusI) *PostService {
 	return &PostService{
 		repository: repository,
