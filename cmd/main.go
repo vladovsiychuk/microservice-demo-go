@@ -1,10 +1,8 @@
 package main
 
 import (
-	"embed"
-
 	"github.com/gin-gonic/gin"
-	"github.com/pressly/goose/v3"
+	"github.com/vladovsiychuk/microservice-demo-go/configs"
 	backendtofrontend "github.com/vladovsiychuk/microservice-demo-go/internal/backend-to-frontend"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/comment"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/post"
@@ -13,9 +11,6 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
-
-//go:embed migrations/*.sql
-var embedMigrations embed.FS
 
 func main() {
 	r := gin.Default()
@@ -30,7 +25,7 @@ func main() {
 	eventBus := eventbus.NewEventBus()
 
 	setupSubscribers(eventBus)
-	setupDbMigration(postgresDB)
+	configs.SetupDbMigration(postgresDB)
 	injectDependencies(postgresDB, eventBus, r)
 
 	r.Run(":8080")
@@ -52,18 +47,4 @@ func injectDependencies(postgresDB *gorm.DB, eventBus *eventbus.EventBus, r *gin
 	commentService := comment.NewService(commentRepository, postService, eventBus)
 	commentHandler := comment.NewRouter(commentService)
 	commentHandler.RegisterRoutes(r)
-}
-
-func setupDbMigration(postgresDB *gorm.DB) {
-	goose.SetBaseFS(embedMigrations)
-	if err := goose.SetDialect("postgres"); err != nil {
-		panic(err)
-	}
-	db, err := postgresDB.DB()
-	if err != nil {
-		panic(err)
-	}
-	if err := goose.Up(db, "migrations"); err != nil {
-		panic(err)
-	}
 }
