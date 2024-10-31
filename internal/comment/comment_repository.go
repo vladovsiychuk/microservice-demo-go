@@ -10,9 +10,9 @@ type CommentRepository struct {
 }
 
 type CommentRepositoryI interface {
-	Create(comment *Comment) error
-	FindByKey(comment *Comment, commentId uuid.UUID) error
-	Update(comment *Comment) error
+	Create(comment CommentI) error
+	FindByKey(commentId uuid.UUID) (CommentI, error)
+	Update(comment CommentI) error
 }
 
 func NewCommentRepository(postgresDB *gorm.DB) *CommentRepository {
@@ -21,14 +21,16 @@ func NewCommentRepository(postgresDB *gorm.DB) *CommentRepository {
 	}
 }
 
-func (r *CommentRepository) Create(comment *Comment) error {
+func (r *CommentRepository) Create(comment CommentI) error {
 	return r.postgresDB.Create(comment).Error
 }
 
-func (r *CommentRepository) FindByKey(comment *Comment, postId uuid.UUID) error {
-	return r.postgresDB.Take(comment, postId).Error
+func (r *CommentRepository) FindByKey(commentId uuid.UUID) (CommentI, error) {
+	var comment Comment
+	err := r.postgresDB.Take(&comment, commentId).Error
+	return &comment, err
 }
 
-func (r *CommentRepository) Update(comment *Comment) error {
-	return r.postgresDB.Save(&comment).Error
+func (r *CommentRepository) Update(comment CommentI) error {
+	return r.postgresDB.Save(comment).Error
 }

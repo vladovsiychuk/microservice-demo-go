@@ -15,6 +15,11 @@ type CommentService struct {
 	eventBus    eventbus.EventBusI
 }
 
+type CommentServiceI interface {
+	CreateComment(req CommentRequest, postId uuid.UUID) (CommentI, error)
+	UpdateComment(req CommentRequest, commentId uuid.UUID) (CommentI, error)
+}
+
 func NewService(
 	repository CommentRepositoryI,
 	postService shared.PostServiceSharedI,
@@ -27,7 +32,7 @@ func NewService(
 	}
 }
 
-func (s *CommentService) CreateComment(req CommentRequest, postId uuid.UUID) (*Comment, error) {
+func (s *CommentService) CreateComment(req CommentRequest, postId uuid.UUID) (CommentI, error) {
 	postIsPrivate, err := s.postService.IsPrivate(postId)
 	if err != nil {
 		return nil, err
@@ -51,10 +56,9 @@ func (s *CommentService) CreateComment(req CommentRequest, postId uuid.UUID) (*C
 	return comment, nil
 }
 
-func (s *CommentService) UpdateComment(req CommentRequest, commentId uuid.UUID) (*Comment, error) {
-	var comment Comment
-
-	if err := s.repository.FindByKey(&comment, commentId); err != nil {
+func (s *CommentService) UpdateComment(req CommentRequest, commentId uuid.UUID) (CommentI, error) {
+	comment, err := s.repository.FindByKey(commentId)
+	if err != nil {
 		return nil, errors.New("Comment not found")
 	}
 
@@ -62,15 +66,15 @@ func (s *CommentService) UpdateComment(req CommentRequest, commentId uuid.UUID) 
 		return nil, err
 	}
 
-	if err := s.repository.Update(&comment); err != nil {
+	if err := s.repository.Update(comment); err != nil {
 		return nil, err
 	}
 
 	s.eventBus.Publish(eventbus.Event{
 		Type:      shared.CommentUpdatedEventType,
 		Timestamp: time.Now(),
-		Data:      &comment,
+		Data:      comment,
 	})
 
-	return &comment, nil
+	return comment, nil
 }

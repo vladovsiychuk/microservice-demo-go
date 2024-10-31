@@ -11,7 +11,11 @@ type Comment struct {
 	Content string    `json:"content"`
 }
 
-func CreateComment(req CommentRequest, postId uuid.UUID, postIsPrivate bool) (*Comment, error) {
+type CommentI interface {
+	Update(req CommentRequest) error
+}
+
+var CreateComment = func(req CommentRequest, postId uuid.UUID, postIsPrivate bool) (CommentI, error) {
 	if postIsPrivate {
 		return nil, customErrors.NewBadRequestError("Comments cannot be added to private posts.")
 	}
