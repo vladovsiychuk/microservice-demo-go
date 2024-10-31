@@ -31,22 +31,34 @@ func (_m *PostRepositoryI) Create(_a0 post.PostI) error {
 	return r0
 }
 
-// FindByKey provides a mock function with given fields: _a0, postId
-func (_m *PostRepositoryI) FindByKey(_a0 post.PostI, postId uuid.UUID) error {
-	ret := _m.Called(_a0, postId)
+// FindByKey provides a mock function with given fields: postId
+func (_m *PostRepositoryI) FindByKey(postId uuid.UUID) (post.PostI, error) {
+	ret := _m.Called(postId)
 
 	if len(ret) == 0 {
 		panic("no return value specified for FindByKey")
 	}
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(post.PostI, uuid.UUID) error); ok {
-		r0 = rf(_a0, postId)
+	var r0 post.PostI
+	var r1 error
+	if rf, ok := ret.Get(0).(func(uuid.UUID) (post.PostI, error)); ok {
+		return rf(postId)
+	}
+	if rf, ok := ret.Get(0).(func(uuid.UUID) post.PostI); ok {
+		r0 = rf(postId)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(post.PostI)
+		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(uuid.UUID) error); ok {
+		r1 = rf(postId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // Update provides a mock function with given fields: _a0

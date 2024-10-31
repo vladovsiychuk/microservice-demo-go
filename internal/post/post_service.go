@@ -46,9 +46,8 @@ func (s *PostService) CreatePost(req PostRequest) (PostI, error) {
 }
 
 func (s *PostService) UpdatePost(postId uuid.UUID, req PostRequest) (PostI, error) {
-	var post Post
-
-	if err := s.repository.FindByKey(&post, postId); err != nil {
+	post, err := s.repository.FindByKey(postId)
+	if err != nil {
 		return nil, errors.New("Post not found")
 	}
 
@@ -56,25 +55,24 @@ func (s *PostService) UpdatePost(postId uuid.UUID, req PostRequest) (PostI, erro
 		return nil, err
 	}
 
-	if err := s.repository.Update(&post); err != nil {
+	if err := s.repository.Update(post); err != nil {
 		return nil, err
 	}
 
 	s.eventBus.Publish(eventbus.Event{
 		Type:      shared.PostUpdatedEventType,
 		Timestamp: time.Now(),
-		Data:      &post,
+		Data:      post,
 	})
 
-	return &post, nil
+	return post, nil
 }
 
 func (s *PostService) IsPrivate(postId uuid.UUID) (bool, error) {
-	var post Post
-
-	if err := s.repository.FindByKey(&post, postId); err != nil {
+	post, err := s.repository.FindByKey(postId)
+	if err != nil {
 		return false, errors.New("Post not found")
 	}
 
-	return post.IsPrivate, nil
+	return post.(*Post).IsPrivate, nil
 }
