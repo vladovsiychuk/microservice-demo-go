@@ -11,12 +11,12 @@ import (
 )
 
 var anyValidPostRequest = post.PostRequest{Content: "foo", IsPrivate: false}
-var anyPost, _ = post.CreatePost(anyValidPostRequest)
 var errFoo = errors.New("Error")
 
 func TestCreatePost(t *testing.T) {
 	repository := mocks.NewPostRepositoryI(t)
 	eventbus := mocks.NewEventBusI(t)
+	mockedPost := mocks.NewPostI(t)
 	service := post.NewService(repository, eventbus)
 
 	originalCreatePostModel := post.CreatePost
@@ -31,7 +31,7 @@ func TestCreatePost(t *testing.T) {
 			name: "Success",
 			setupMocks: func() {
 				post.CreatePost = func(req post.PostRequest) (post.PostI, error) {
-					return anyPost, nil
+					return mockedPost, nil
 				}
 				repository.On("Create", mock.Anything).Return(nil).Once()
 				eventbus.On("Publish", mock.Anything)
@@ -51,7 +51,7 @@ func TestCreatePost(t *testing.T) {
 			name: "With DB error",
 			setupMocks: func() {
 				post.CreatePost = func(req post.PostRequest) (post.PostI, error) {
-					return anyPost, nil
+					return mockedPost, nil
 				}
 				repository.On("Create", mock.Anything).Return(errFoo).Once()
 			},
