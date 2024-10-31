@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/post"
@@ -92,27 +93,34 @@ func TestUpdatePost(t *testing.T) {
 		{
 			name: "Success",
 			setupMocks: func() {
-				repository.On("FindByKey", mock.Anything).Return(nil).Once()
+				repository.On("FindByKey", mock.Anything).Return(mockedPost, nil).Once()
+				mockedPost.On("Update", mock.Anything).Return(nil).Once()
+				repository.On("Update", mock.Anything).Return(nil).Once()
 				eventbus.On("Publish", mock.Anything)
 			},
 			expectedError: nil,
 		},
 		{
-			name: "With Model Error",
+			name: "With DB FindByKey Error",
 			setupMocks: func() {
-				post.CreatePost = func(req post.PostRequest) (post.PostI, error) {
-					return nil, errFoo
-				}
+				repository.On("FindByKey", mock.Anything).Return(nil, errFoo).Once()
+			},
+			expectedError: errors.New("Post not found"),
+		},
+		{
+			name: "With post model Error",
+			setupMocks: func() {
+				repository.On("FindByKey", mock.Anything).Return(mockedPost, nil).Once()
+				mockedPost.On("Update", mock.Anything).Return(errFoo).Once()
 			},
 			expectedError: errFoo,
 		},
 		{
-			name: "With DB error",
+			name: "With DB Update Error",
 			setupMocks: func() {
-				post.CreatePost = func(req post.PostRequest) (post.PostI, error) {
-					return mockedPost, nil
-				}
-				repository.On("Create", mock.Anything).Return(errFoo).Once()
+				repository.On("FindByKey", mock.Anything).Return(mockedPost, nil).Once()
+				mockedPost.On("Update", mock.Anything).Return(nil).Once()
+				repository.On("Update", mock.Anything).Return(errFoo).Once()
 			},
 			expectedError: errFoo,
 		},
@@ -122,7 +130,7 @@ func TestUpdatePost(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setupMocks()
 
-			response, err := service.CreatePost(anyValidPostRequest)
+			response, err := service.UpdatePost(uuid.New(), anyValidPostRequest)
 
 			assert.Equal(t, tt.expectedError, err)
 			if tt.expectedError != nil {
