@@ -15,8 +15,8 @@ type PostService struct {
 }
 
 type PostServiceI interface {
-	CreatePost(req PostRequest) (*Post, error)
-	UpdatePost(postId uuid.UUID, req PostRequest) (*Post, error)
+	CreatePost(req PostRequest) (PostI, error)
+	UpdatePost(postId uuid.UUID, req PostRequest) (PostI, error)
 }
 
 func NewService(repository PostRepositoryI, eventBus eventbus.EventBusI) *PostService {
@@ -26,7 +26,7 @@ func NewService(repository PostRepositoryI, eventBus eventbus.EventBusI) *PostSe
 	}
 }
 
-func (s *PostService) CreatePost(req PostRequest) (*Post, error) {
+func (s *PostService) CreatePost(req PostRequest) (PostI, error) {
 	post, err := CreatePost(req)
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func (s *PostService) CreatePost(req PostRequest) (*Post, error) {
 	return post, nil
 }
 
-func (s *PostService) UpdatePost(postId uuid.UUID, req PostRequest) (*Post, error) {
+func (s *PostService) UpdatePost(postId uuid.UUID, req PostRequest) (PostI, error) {
 	var post Post
 
 	if err := s.repository.FindByKey(&post, postId); err != nil {

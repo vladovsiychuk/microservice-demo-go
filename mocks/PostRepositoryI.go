@@ -14,7 +14,7 @@ type PostRepositoryI struct {
 }
 
 // Create provides a mock function with given fields: _a0
-func (_m *PostRepositoryI) Create(_a0 *post.Post) error {
+func (_m *PostRepositoryI) Create(_a0 post.PostI) error {
 	ret := _m.Called(_a0)
 
 	if len(ret) == 0 {
@@ -22,7 +22,7 @@ func (_m *PostRepositoryI) Create(_a0 *post.Post) error {
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*post.Post) error); ok {
+	if rf, ok := ret.Get(0).(func(post.PostI) error); ok {
 		r0 = rf(_a0)
 	} else {
 		r0 = ret.Error(0)
@@ -32,7 +32,7 @@ func (_m *PostRepositoryI) Create(_a0 *post.Post) error {
 }
 
 // FindByKey provides a mock function with given fields: _a0, postId
-func (_m *PostRepositoryI) FindByKey(_a0 *post.Post, postId uuid.UUID) error {
+func (_m *PostRepositoryI) FindByKey(_a0 post.PostI, postId uuid.UUID) error {
 	ret := _m.Called(_a0, postId)
 
 	if len(ret) == 0 {
@@ -40,7 +40,7 @@ func (_m *PostRepositoryI) FindByKey(_a0 *post.Post, postId uuid.UUID) error {
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*post.Post, uuid.UUID) error); ok {
+	if rf, ok := ret.Get(0).(func(post.PostI, uuid.UUID) error); ok {
 		r0 = rf(_a0, postId)
 	} else {
 		r0 = ret.Error(0)
@@ -50,7 +50,7 @@ func (_m *PostRepositoryI) FindByKey(_a0 *post.Post, postId uuid.UUID) error {
 }
 
 // Update provides a mock function with given fields: _a0
-func (_m *PostRepositoryI) Update(_a0 *post.Post) error {
+func (_m *PostRepositoryI) Update(_a0 post.PostI) error {
 	ret := _m.Called(_a0)
 
 	if len(ret) == 0 {
@@ -58,7 +58,7 @@ func (_m *PostRepositoryI) Update(_a0 *post.Post) error {
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*post.Post) error); ok {
+	if rf, ok := ret.Get(0).(func(post.PostI) error); ok {
 		r0 = rf(_a0)
 	} else {
 		r0 = ret.Error(0)

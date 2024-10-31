@@ -30,7 +30,7 @@ func TestCreatePost(t *testing.T) {
 		{
 			name: "Success",
 			setupMocks: func() {
-				post.CreatePost = func(req post.PostRequest) (*post.Post, error) {
+				post.CreatePost = func(req post.PostRequest) (post.PostI, error) {
 					return anyPost, nil
 				}
 				repository.On("Create", mock.Anything).Return(nil).Once()
@@ -41,7 +41,7 @@ func TestCreatePost(t *testing.T) {
 		{
 			name: "With Model Error",
 			setupMocks: func() {
-				post.CreatePost = func(req post.PostRequest) (*post.Post, error) {
+				post.CreatePost = func(req post.PostRequest) (post.PostI, error) {
 					return nil, errFoo
 				}
 			},
@@ -50,7 +50,7 @@ func TestCreatePost(t *testing.T) {
 		{
 			name: "With DB error",
 			setupMocks: func() {
-				post.CreatePost = func(req post.PostRequest) (*post.Post, error) {
+				post.CreatePost = func(req post.PostRequest) (post.PostI, error) {
 					return anyPost, nil
 				}
 				repository.On("Create", mock.Anything).Return(errFoo).Once()

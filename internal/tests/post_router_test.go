@@ -18,7 +18,7 @@ import (
 func TestCreatePostAndReturnJsonResponse(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	mockService := mocks.NewPostServiceInternalI(t)
+	mockService := mocks.NewPostServiceI(t)
 	router := gin.Default()
 
 	postRouter := post.NewRouter(mockService)

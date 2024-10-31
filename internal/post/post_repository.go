@@ -10,9 +10,9 @@ type PostRepository struct {
 }
 
 type PostRepositoryI interface {
-	Create(post *Post) error
-	FindByKey(post *Post, postId uuid.UUID) error
-	Update(post *Post) error
+	Create(post PostI) error
+	FindByKey(post PostI, postId uuid.UUID) error
+	Update(post PostI) error
 }
 
 func NewPostRepository(postgresDB *gorm.DB) *PostRepository {
@@ -21,14 +21,14 @@ func NewPostRepository(postgresDB *gorm.DB) *PostRepository {
 	}
 }
 
-func (r *PostRepository) Create(post *Post) error {
+func (r *PostRepository) Create(post PostI) error {
 	return r.postgresDB.Create(post).Error
 }
 
-func (r *PostRepository) FindByKey(post *Post, postId uuid.UUID) error {
+func (r *PostRepository) FindByKey(post PostI, postId uuid.UUID) error {
 	return r.postgresDB.Take(post, postId).Error
 }
 
-func (r *PostRepository) Update(post *Post) error {
+func (r *PostRepository) Update(post PostI) error {
 	return r.postgresDB.Save(&post).Error
 }
