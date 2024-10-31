@@ -30,5 +30,5 @@ func (r *PostRepository) FindByKey(post PostI, postId uuid.UUID) error {
 }
 
 func (r *PostRepository) Update(post PostI) error {
-	return r.postgresDB.Save(&post).Error
+	return r.postgresDB.Save(post).Error
 }
