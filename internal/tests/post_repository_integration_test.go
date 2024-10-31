@@ -47,7 +47,7 @@ func TestPostRepository(t *testing.T) {
 	host, _ := postgresContainer.Host(ctx)
 	port, _ := postgresContainer.MappedPort(ctx, "5432")
 
-	dsn := fmt.Sprintf("host=%s user=user password=password dbname=testdb port=%s sslmode=disable", host, port.Port())
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", host, dbUser, dbPassword, dbName, port.Port())
 	postgresDB, err := gorm.Open(pgDriver.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")

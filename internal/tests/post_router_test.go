@@ -15,7 +15,7 @@ import (
 	"github.com/vladovsiychuk/microservice-demo-go/mocks"
 )
 
-func TestCreatePostAndReturnJsonResponse(t *testing.T) {
+func TestPostRouter(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	mockService := mocks.NewPostServiceI(t)
