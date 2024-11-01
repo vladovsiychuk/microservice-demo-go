@@ -13,11 +13,12 @@ type CommentItem struct {
 type PostAggregate struct {
 	Id        uuid.UUID `bson:"_id"`
 	Content   string
-	IsPrivate bool
+	IsPrivate bool `bson:"is_private"`
 	comments  []CommentItem
 }
 
 type PostAggregateI interface {
+	Update(post *post.Post) error
 }
 
 var CreatePostAggregate = func(post *post.Post) (PostAggregateI, error) {
@@ -27,4 +28,10 @@ var CreatePostAggregate = func(post *post.Post) (PostAggregateI, error) {
 		post.IsPrivate,
 		[]CommentItem{},
 	}, nil
+}
+
+func (a *PostAggregate) Update(post *post.Post) error {
+	a.Content = post.Content
+	a.IsPrivate = post.IsPrivate
+	return nil
 }

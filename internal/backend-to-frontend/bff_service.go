@@ -34,8 +34,16 @@ func (s *BffService) CreatePostAggregate(post *post.Post) {
 		fmt.Printf("Error when saving to mongo db: " + err.Error())
 	}
 }
-func (s *BffService) UpdatePostAggregate(*post.Post) {
+func (s *BffService) UpdatePostAggregate(post *post.Post) {
+	postAgg, err := s.repository.FindById(post.Id)
+	if err != nil {
+		fmt.Printf("Error during post aggregate query: " + err.Error())
+	}
 
+	postAgg.Update(post)
+	if err := s.repository.Update(postAgg); err != nil {
+		fmt.Printf("Error during post update: " + err.Error())
+	}
 }
 func (s *BffService) AddCommentToPostAggregate(*comment.Comment) {
 
