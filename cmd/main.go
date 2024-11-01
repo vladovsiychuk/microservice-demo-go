@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+
 	"github.com/gin-gonic/gin"
 	"github.com/vladovsiychuk/microservice-demo-go/configs"
 	backendtofrontend "github.com/vladovsiychuk/microservice-demo-go/internal/backend-to-frontend"
@@ -8,6 +10,8 @@ import (
 	"github.com/vladovsiychuk/microservice-demo-go/internal/post"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/shared"
 	eventbus "github.com/vladovsiychuk/microservice-demo-go/pkg/event-bus"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -22,15 +26,17 @@ func main() {
 		panic("failed to connect database")
 	}
 
+	mongoDB := setupMongoDb()
+
 	eventBus := eventbus.NewEventBus()
 
 	configs.SetupDbMigration(postgresDB)
-	injectDependencies(postgresDB, eventBus, r)
+	injectDependencies(postgresDB, mongoDB, eventBus, r)
 
 	r.Run(":8080")
 }
 
-func injectDependencies(postgresDB *gorm.DB, eventBus *eventbus.EventBus, r *gin.Engine) {
+func injectDependencies(postgresDB *gorm.DB, mongoDB *mongo.Database, eventBus *eventbus.EventBus, r *gin.Engine) {
 	postRepository := post.NewPostRepository(postgresDB)
 	postService := post.NewService(postRepository, eventBus)
 	postHandler := post.NewRouter(postService)
@@ -41,7 +47,7 @@ func injectDependencies(postgresDB *gorm.DB, eventBus *eventbus.EventBus, r *gin
 	commentHandler := comment.NewRouter(commentService)
 	commentHandler.RegisterRoutes(r)
 
-	postAggregateRepository := backendtofrontend.NewPostAggregateRepository()
+	postAggregateRepository := backendtofrontend.NewPostAggregateRepository(mongoDB)
 	bffService := backendtofrontend.NewService(postAggregateRepository)
 	eventHandler := backendtofrontend.NewEventHandler(bffService)
 	setupSubscribers(eventBus, eventHandler)
@@ -63,4 +69,14 @@ func setupSubscribers(eventBus *eventbus.EventBus, eventHandler *backendtofronte
 	commentUpdatedChan := make(chan eventbus.Event)
 	eventBus.Subscribe(shared.CommentUpdatedEventType, commentUpdatedChan)
 	go eventHandler.CommentUpdatedHandler(commentUpdatedChan)
+}
+
+func setupMongoDb() *mongo.Database {
+	uri := "mongodb://root:example@localhost:27017/test?authSource=admin"
+	client, err := mongo.Connect(context.TODO(), options.Client().
+		ApplyURI(uri))
+	if err != nil {
+		panic(err)
+	}
+	return client.Database("test")
 }

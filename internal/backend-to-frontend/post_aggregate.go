@@ -11,7 +11,7 @@ type CommentItem struct {
 }
 
 type PostAggregate struct {
-	Id        uuid.UUID
+	Id        uuid.UUID `bson:"_id"`
 	Content   string
 	IsPrivate bool
 	comments  []CommentItem
