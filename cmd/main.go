@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/vladovsiychuk/microservice-demo-go/configs"
-	backendforfrontend "github.com/vladovsiychuk/microservice-demo-go/internal/backend-for-frontend"
+	backendforfrontend "github.com/vladovsiychuk/microservice-demo-go/internal/backendforfrontend"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/comment"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/post"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/shared"

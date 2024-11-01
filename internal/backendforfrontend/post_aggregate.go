@@ -1,4 +1,4 @@
-package backendtofrontend
+package backendforfrontend
 
 import (
 	"github.com/google/uuid"

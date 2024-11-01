@@ -1,4 +1,4 @@
-package backendtofrontend
+package backendforfrontend
 
 import (
 	"fmt"
