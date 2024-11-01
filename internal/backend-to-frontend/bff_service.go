@@ -45,9 +45,26 @@ func (s *BffService) UpdatePostAggregate(post *post.Post) {
 		fmt.Printf("Error during post update: " + err.Error())
 	}
 }
-func (s *BffService) AddCommentToPostAggregate(*comment.Comment) {
+func (s *BffService) AddCommentToPostAggregate(comment *comment.Comment) {
+	postAgg, err := s.repository.FindById(comment.PostId)
+	if err != nil {
+		fmt.Printf("Error during post aggregate query: " + err.Error())
+	}
+
+	postAgg.AddComment(comment)
+	if err := s.repository.Update(postAgg); err != nil {
+		fmt.Printf("Error during post update: " + err.Error())
+	}
 
 }
-func (s *BffService) UpdateCommentInPostAggregate(*comment.Comment) {
+func (s *BffService) UpdateCommentInPostAggregate(comment *comment.Comment) {
+	postAgg, err := s.repository.FindById(comment.PostId)
+	if err != nil {
+		fmt.Printf("Error during post aggregate query: " + err.Error())
+	}
 
+	postAgg.UpdateComment(comment)
+	if err := s.repository.Update(postAgg); err != nil {
+		fmt.Printf("Error during post update: " + err.Error())
+	}
 }
