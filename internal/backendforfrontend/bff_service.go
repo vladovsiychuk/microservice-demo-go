@@ -3,6 +3,7 @@ package backendforfrontend
 import (
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/comment"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/post"
 )
@@ -12,6 +13,7 @@ type BffService struct {
 }
 
 type BffServiceI interface {
+	GetPostAggregate(postId uuid.UUID) (PostAggregateI, error)
 	CreatePostAggregate(*post.Post)
 	UpdatePostAggregate(*post.Post)
 	AddCommentToPostAggregate(*comment.Comment)
@@ -22,6 +24,15 @@ func NewService(repository PostAggregateRepositoryI) *BffService {
 	return &BffService{
 		repository: repository,
 	}
+}
+
+func (s *BffService) GetPostAggregate(postId uuid.UUID) (PostAggregateI, error) {
+	postAgg, err := s.repository.FindById(postId)
+	if err != nil {
+		return nil, err
+	}
+
+	return postAgg, nil
 }
 
 func (s *BffService) CreatePostAggregate(post *post.Post) {

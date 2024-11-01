@@ -49,6 +49,8 @@ func injectDependencies(postgresDB *gorm.DB, mongoDB *mongo.Database, eventBus *
 
 	postAggregateRepository := backendforfrontend.NewPostAggregateRepository(mongoDB)
 	bffService := backendforfrontend.NewService(postAggregateRepository)
+	bffRouter := backendforfrontend.NewRouter(bffService)
+	bffRouter.RegisterRoutes(r)
 	eventHandler := backendforfrontend.NewEventHandler(bffService)
 	setupSubscribers(eventBus, eventHandler)
 }

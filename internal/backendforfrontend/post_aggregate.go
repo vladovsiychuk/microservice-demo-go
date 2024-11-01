@@ -7,15 +7,15 @@ import (
 )
 
 type CommentItem struct {
-	Id      uuid.UUID
-	Content string
+	Id      uuid.UUID `json:"id"`
+	Content string    `json:"content"`
 }
 
 type PostAggregate struct {
-	Id        uuid.UUID `bson:"_id"`
-	Content   string
-	IsPrivate bool `bson:"is_private"`
-	Comments  []CommentItem
+	Id        uuid.UUID     `bson:"_id" json:"id"`
+	Content   string        `json:"content"`
+	IsPrivate bool          `bson:"is_private" json:"is_private"`
+	Comments  []CommentItem `json:"comments"`
 }
 
 type PostAggregateI interface {
