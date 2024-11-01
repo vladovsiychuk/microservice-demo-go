@@ -26,9 +26,7 @@ func (h *EventHandler) PostCreatedHandler(eventChan <-chan eventbus.Event) {
 			continue
 		}
 
-		// Handle the event
-		fmt.Println("New post created registered:")
-		fmt.Println("content:", post.Content)
+		h.service.CreatePostAggregate(post)
 	}
 }
 
@@ -40,9 +38,7 @@ func (h *EventHandler) PostUpdatedHandler(eventChan <-chan eventbus.Event) {
 			continue
 		}
 
-		// Handle the event
-		fmt.Println("New post updated registered:")
-		fmt.Println("content:", post.Content)
+		h.service.UpdatePostAggregate(post)
 	}
 }
 
@@ -54,9 +50,7 @@ func (h *EventHandler) CommentCreatedHandler(eventChan <-chan eventbus.Event) {
 			continue
 		}
 
-		// Handle the event
-		fmt.Println("New comment created registered:")
-		fmt.Println("content:", comment.Content)
+		h.service.AddCommentToPostAggregate(comment)
 	}
 }
 
@@ -68,8 +62,6 @@ func (h *EventHandler) CommentUpdatedHandler(eventChan <-chan eventbus.Event) {
 			continue
 		}
 
-		// Handle the event
-		fmt.Println("New comment updated registered:")
-		fmt.Println("content:", comment.Content)
+		h.service.UpdateCommentInPostAggregate(comment)
 	}
 }
