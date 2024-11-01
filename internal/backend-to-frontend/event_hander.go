@@ -8,7 +8,17 @@ import (
 	eventbus "github.com/vladovsiychuk/microservice-demo-go/pkg/event-bus"
 )
 
-func PostCreatedHandler(eventChan <-chan eventbus.Event) {
+type EventHandler struct {
+	service BffServiceI
+}
+
+func NewEventHandler(service BffServiceI) *EventHandler {
+	return &EventHandler{
+		service: service,
+	}
+}
+
+func (h *EventHandler) PostCreatedHandler(eventChan <-chan eventbus.Event) {
 	for event := range eventChan {
 		post, ok := event.Data.(*post.Post)
 		if !ok {
@@ -22,7 +32,7 @@ func PostCreatedHandler(eventChan <-chan eventbus.Event) {
 	}
 }
 
-func PostUpdatedHandler(eventChan <-chan eventbus.Event) {
+func (h *EventHandler) PostUpdatedHandler(eventChan <-chan eventbus.Event) {
 	for event := range eventChan {
 		post, ok := event.Data.(*post.Post)
 		if !ok {
@@ -36,7 +46,7 @@ func PostUpdatedHandler(eventChan <-chan eventbus.Event) {
 	}
 }
 
-func CommentCreatedHandler(eventChan <-chan eventbus.Event) {
+func (h *EventHandler) CommentCreatedHandler(eventChan <-chan eventbus.Event) {
 	for event := range eventChan {
 		comment, ok := event.Data.(*comment.Comment)
 		if !ok {
@@ -50,7 +60,7 @@ func CommentCreatedHandler(eventChan <-chan eventbus.Event) {
 	}
 }
 
-func CommentUpdatedHandler(eventChan <-chan eventbus.Event) {
+func (h *EventHandler) CommentUpdatedHandler(eventChan <-chan eventbus.Event) {
 	for event := range eventChan {
 		comment, ok := event.Data.(*comment.Comment)
 		if !ok {

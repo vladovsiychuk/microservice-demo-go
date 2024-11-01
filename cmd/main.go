@@ -24,29 +24,10 @@ func main() {
 
 	eventBus := eventbus.NewEventBus()
 
-	setupSubscribers(eventBus)
 	configs.SetupDbMigration(postgresDB)
 	injectDependencies(postgresDB, eventBus, r)
 
 	r.Run(":8080")
-}
-
-func setupSubscribers(eventBus *eventbus.EventBus) {
-	postCreatedChan := make(chan eventbus.Event)
-	eventBus.Subscribe(shared.PostCreatedEventType, postCreatedChan)
-	go backendtofrontend.PostCreatedHandler(postCreatedChan)
-
-	postUpdatedChan := make(chan eventbus.Event)
-	eventBus.Subscribe(shared.PostUpdatedEventType, postUpdatedChan)
-	go backendtofrontend.PostUpdatedHandler(postUpdatedChan)
-
-	commentCreatedChan := make(chan eventbus.Event)
-	eventBus.Subscribe(shared.CommentCreatedEventType, commentCreatedChan)
-	go backendtofrontend.CommentCreatedHandler(commentCreatedChan)
-
-	commentUpdatedChan := make(chan eventbus.Event)
-	eventBus.Subscribe(shared.CommentUpdatedEventType, commentUpdatedChan)
-	go backendtofrontend.CommentUpdatedHandler(commentUpdatedChan)
 }
 
 func injectDependencies(postgresDB *gorm.DB, eventBus *eventbus.EventBus, r *gin.Engine) {
@@ -59,4 +40,26 @@ func injectDependencies(postgresDB *gorm.DB, eventBus *eventbus.EventBus, r *gin
 	commentService := comment.NewService(commentRepository, postService, eventBus)
 	commentHandler := comment.NewRouter(commentService)
 	commentHandler.RegisterRoutes(r)
+
+	bffService := backendtofrontend.NewService()
+	eventHandler := backendtofrontend.NewEventHandler(bffService)
+	setupSubscribers(eventBus, eventHandler)
+}
+
+func setupSubscribers(eventBus *eventbus.EventBus, eventHandler *backendtofrontend.EventHandler) {
+	postCreatedChan := make(chan eventbus.Event)
+	eventBus.Subscribe(shared.PostCreatedEventType, postCreatedChan)
+	go eventHandler.PostCreatedHandler(postCreatedChan)
+
+	postUpdatedChan := make(chan eventbus.Event)
+	eventBus.Subscribe(shared.PostUpdatedEventType, postUpdatedChan)
+	go eventHandler.PostUpdatedHandler(postUpdatedChan)
+
+	commentCreatedChan := make(chan eventbus.Event)
+	eventBus.Subscribe(shared.CommentCreatedEventType, commentCreatedChan)
+	go eventHandler.CommentCreatedHandler(commentCreatedChan)
+
+	commentUpdatedChan := make(chan eventbus.Event)
+	eventBus.Subscribe(shared.CommentUpdatedEventType, commentUpdatedChan)
+	go eventHandler.CommentUpdatedHandler(commentUpdatedChan)
 }
