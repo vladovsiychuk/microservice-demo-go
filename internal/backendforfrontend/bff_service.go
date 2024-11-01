@@ -10,6 +10,7 @@ import (
 
 type BffService struct {
 	repository PostAggregateRepositoryI
+	redisCache RedisRepositoryI
 }
 
 type BffServiceI interface {
@@ -20,9 +21,10 @@ type BffServiceI interface {
 	UpdateCommentInPostAggregate(*comment.Comment)
 }
 
-func NewService(repository PostAggregateRepositoryI) *BffService {
+func NewService(repository PostAggregateRepositoryI, redisCache RedisRepositoryI) *BffService {
 	return &BffService{
 		repository: repository,
+		redisCache: redisCache,
 	}
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"github.com/vladovsiychuk/microservice-demo-go/configs"
 	backendforfrontend "github.com/vladovsiychuk/microservice-demo-go/internal/backendforfrontend"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/comment"
@@ -26,17 +27,30 @@ func main() {
 		panic("failed to connect database")
 	}
 
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // No password set
+		DB:       0,  // Use default DB
+		Protocol: 2,  // Connection protocol
+	})
+
 	mongoDB := setupMongoDb()
 
 	eventBus := eventbus.NewEventBus()
 
 	configs.SetupDbMigration(postgresDB)
-	injectDependencies(postgresDB, mongoDB, eventBus, r)
+	injectDependencies(postgresDB, mongoDB, redisClient, eventBus, r)
 
 	r.Run(":8080")
 }
 
-func injectDependencies(postgresDB *gorm.DB, mongoDB *mongo.Database, eventBus *eventbus.EventBus, r *gin.Engine) {
+func injectDependencies(
+	postgresDB *gorm.DB,
+	mongoDB *mongo.Database,
+	redisClient *redis.Client,
+	eventBus *eventbus.EventBus,
+	r *gin.Engine,
+) {
 	postRepository := post.NewPostRepository(postgresDB)
 	postService := post.NewService(postRepository, eventBus)
 	postHandler := post.NewRouter(postService)
@@ -48,7 +62,8 @@ func injectDependencies(postgresDB *gorm.DB, mongoDB *mongo.Database, eventBus *
 	commentHandler.RegisterRoutes(r)
 
 	postAggregateRepository := backendforfrontend.NewPostAggregateRepository(mongoDB)
-	bffService := backendforfrontend.NewService(postAggregateRepository)
+	redisCache := backendforfrontend.NewRedisRepository(redisClient)
+	bffService := backendforfrontend.NewService(postAggregateRepository, redisCache)
 	bffRouter := backendforfrontend.NewRouter(bffService)
 	bffRouter.RegisterRoutes(r)
 	eventHandler := backendforfrontend.NewEventHandler(bffService)
