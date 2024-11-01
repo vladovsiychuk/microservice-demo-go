@@ -6,6 +6,7 @@ import (
 )
 
 type BffService struct {
+	repository PostAggregateRepositoryI
 }
 
 type BffServiceI interface {
@@ -15,8 +16,10 @@ type BffServiceI interface {
 	UpdateCommentInPostAggregate(*comment.Comment)
 }
 
-func NewService() *BffService {
-	return &BffService{}
+func NewService(repository PostAggregateRepositoryI) *BffService {
+	return &BffService{
+		repository: repository,
+	}
 }
 
 func (s *BffService) CreatePostAggregate(*post.Post) {

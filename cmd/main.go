@@ -41,7 +41,8 @@ func injectDependencies(postgresDB *gorm.DB, eventBus *eventbus.EventBus, r *gin
 	commentHandler := comment.NewRouter(commentService)
 	commentHandler.RegisterRoutes(r)
 
-	bffService := backendtofrontend.NewService()
+	postAggregateRepository := backendtofrontend.NewPostAggregateRepository()
+	bffService := backendtofrontend.NewService(postAggregateRepository)
 	eventHandler := backendtofrontend.NewEventHandler(bffService)
 	setupSubscribers(eventBus, eventHandler)
 }
