@@ -58,6 +58,8 @@ func (s *BffService) UpdatePostAggregate(post *post.Post) {
 	if err := s.repository.Update(postAgg); err != nil {
 		fmt.Printf("Error during post update: " + err.Error())
 	}
+
+	s.redisCache.UpdateCache(postAgg)
 }
 
 func (s *BffService) AddCommentToPostAggregate(comment *comment.Comment) {
