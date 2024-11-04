@@ -50,7 +50,7 @@ func (s *BffService) GetPostAggregate(postId uuid.UUID) (PostAggregateI, error) 
 	postAggFromMongo, err := s.repository.FindById(postId)
 	if err == nil {
 		return postAggFromMongo, nil
-	} else if err != mongo.ErrNilDocument {
+	} else if err != mongo.ErrNoDocuments {
 		return nil, err
 	}
 
