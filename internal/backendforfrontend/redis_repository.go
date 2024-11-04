@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -13,13 +14,29 @@ type RedisRepository struct {
 }
 
 type RedisRepositoryI interface {
-	UpdateCache(post PostAggregateI)
+	FindByPostId(uuid.UUID) (PostAggregateI, error)
+	UpdateCache(PostAggregateI)
 }
 
 func NewRedisRepository(redisClient *redis.Client) *RedisRepository {
 	return &RedisRepository{
 		redisClient: redisClient,
 	}
+}
+
+func (r *RedisRepository) FindByPostId(postId uuid.UUID) (PostAggregateI, error) {
+	postKey := fmt.Sprintf("post:%s", postId)
+	postData, err := r.redisClient.Get(context.Background(), postKey).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	var post PostAggregate
+	if err := json.Unmarshal([]byte(postData), &post); err != nil {
+		return nil, err
+	}
+
+	return &post, nil
 }
 
 func (r *RedisRepository) UpdateCache(postAgg PostAggregateI) {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/comment"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/post"
 )
@@ -29,12 +30,19 @@ func NewService(repository PostAggregateRepositoryI, redisCache RedisRepositoryI
 }
 
 func (s *BffService) GetPostAggregate(postId uuid.UUID) (PostAggregateI, error) {
-	postAgg, err := s.repository.FindById(postId)
+	cachedPostAgg, err := s.redisCache.FindByPostId(postId)
 	if err != nil {
-		return nil, err
+		if err == redis.Nil {
+			mongoPostAgg, err := s.repository.FindById(postId)
+			if err != nil {
+				return nil, err
+			}
+
+			return mongoPostAgg, nil
+		}
 	}
 
-	return postAgg, nil
+	return cachedPostAgg, nil
 }
 
 func (s *BffService) CreatePostAggregate(post *post.Post) {
