@@ -31,15 +31,10 @@ func NewService(repository PostAggregateRepositoryI, redisCache RedisRepositoryI
 
 func (s *BffService) GetPostAggregate(postId uuid.UUID) (PostAggregateI, error) {
 	cachedPostAgg, err := s.redisCache.FindByPostId(postId)
-	if err != nil {
-		if err == redis.Nil {
-			mongoPostAgg, err := s.repository.FindById(postId)
-			if err != nil {
-				return nil, err
-			}
-
-			return mongoPostAgg, nil
-		}
+	if err == redis.Nil {
+		return s.repository.FindById(postId)
+	} else if err != nil {
+		return nil, err
 	}
 
 	return cachedPostAgg, nil
