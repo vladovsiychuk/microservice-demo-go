@@ -63,7 +63,7 @@ func injectDependencies(
 
 	postAggregateRepository := backendforfrontend.NewPostAggregateRepository(mongoDB)
 	redisCache := backendforfrontend.NewRedisRepository(redisClient)
-	bffService := backendforfrontend.NewService(postAggregateRepository, redisCache)
+	bffService := backendforfrontend.NewService(postAggregateRepository, redisCache, postService, commentService)
 	bffRouter := backendforfrontend.NewRouter(bffService)
 	bffRouter.RegisterRoutes(r)
 	eventHandler := backendforfrontend.NewEventHandler(bffService)

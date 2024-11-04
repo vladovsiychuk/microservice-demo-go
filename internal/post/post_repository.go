@@ -11,7 +11,7 @@ type PostRepository struct {
 
 type PostRepositoryI interface {
 	Create(post PostI) error
-	FindByKey(postId uuid.UUID) (PostI, error)
+	FindById(postId uuid.UUID) (PostI, error)
 	Update(post PostI) error
 }
 
@@ -25,7 +25,7 @@ func (r *PostRepository) Create(post PostI) error {
 	return r.postgresDB.Create(post).Error
 }
 
-func (r *PostRepository) FindByKey(postId uuid.UUID) (PostI, error) {
+func (r *PostRepository) FindById(postId uuid.UUID) (PostI, error) {
 	var post Post
 	err := r.postgresDB.Take(&post, postId).Error
 	return &post, err

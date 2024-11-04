@@ -15,7 +15,7 @@ type CommentRepositoryI struct {
 }
 
 // Create provides a mock function with given fields: _a0
-func (_m *CommentRepositoryI) Create(_a0 *comment.Comment) error {
+func (_m *CommentRepositoryI) Create(_a0 comment.CommentI) error {
 	ret := _m.Called(_a0)
 
 	if len(ret) == 0 {
@@ -23,7 +23,7 @@ func (_m *CommentRepositoryI) Create(_a0 *comment.Comment) error {
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*comment.Comment) error); ok {
+	if rf, ok := ret.Get(0).(func(comment.CommentI) error); ok {
 		r0 = rf(_a0)
 	} else {
 		r0 = ret.Error(0)
@@ -32,26 +32,38 @@ func (_m *CommentRepositoryI) Create(_a0 *comment.Comment) error {
 	return r0
 }
 
-// FindByKey provides a mock function with given fields: _a0, commentId
-func (_m *CommentRepositoryI) FindByKey(_a0 *comment.Comment, commentId uuid.UUID) error {
-	ret := _m.Called(_a0, commentId)
+// FindByKey provides a mock function with given fields: commentId
+func (_m *CommentRepositoryI) FindByKey(commentId uuid.UUID) (comment.CommentI, error) {
+	ret := _m.Called(commentId)
 
 	if len(ret) == 0 {
 		panic("no return value specified for FindByKey")
 	}
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(*comment.Comment, uuid.UUID) error); ok {
-		r0 = rf(_a0, commentId)
+	var r0 comment.CommentI
+	var r1 error
+	if rf, ok := ret.Get(0).(func(uuid.UUID) (comment.CommentI, error)); ok {
+		return rf(commentId)
+	}
+	if rf, ok := ret.Get(0).(func(uuid.UUID) comment.CommentI); ok {
+		r0 = rf(commentId)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(comment.CommentI)
+		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(uuid.UUID) error); ok {
+		r1 = rf(commentId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // Update provides a mock function with given fields: _a0
-func (_m *CommentRepositoryI) Update(_a0 *comment.Comment) error {
+func (_m *CommentRepositoryI) Update(_a0 comment.CommentI) error {
 	ret := _m.Called(_a0)
 
 	if len(ret) == 0 {
@@ -59,7 +71,7 @@ func (_m *CommentRepositoryI) Update(_a0 *comment.Comment) error {
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*comment.Comment) error); ok {
+	if rf, ok := ret.Get(0).(func(comment.CommentI) error); ok {
 		r0 = rf(_a0)
 	} else {
 		r0 = ret.Error(0)

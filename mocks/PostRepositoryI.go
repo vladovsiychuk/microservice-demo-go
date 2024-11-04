@@ -31,12 +31,12 @@ func (_m *PostRepositoryI) Create(_a0 post.PostI) error {
 	return r0
 }
 
-// FindByKey provides a mock function with given fields: postId
-func (_m *PostRepositoryI) FindByKey(postId uuid.UUID) (post.PostI, error) {
+// FindById provides a mock function with given fields: postId
+func (_m *PostRepositoryI) FindById(postId uuid.UUID) (post.PostI, error) {
 	ret := _m.Called(postId)
 
 	if len(ret) == 0 {
-		panic("no return value specified for FindByKey")
+		panic("no return value specified for FindById")
 	}
 
 	var r0 post.PostI

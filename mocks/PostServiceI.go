@@ -43,6 +43,36 @@ func (_m *PostServiceI) CreatePost(req post.PostRequest) (post.PostI, error) {
 	return r0, r1
 }
 
+// FindById provides a mock function with given fields: postId
+func (_m *PostServiceI) FindById(postId uuid.UUID) (post.PostI, error) {
+	ret := _m.Called(postId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindById")
+	}
+
+	var r0 post.PostI
+	var r1 error
+	if rf, ok := ret.Get(0).(func(uuid.UUID) (post.PostI, error)); ok {
+		return rf(postId)
+	}
+	if rf, ok := ret.Get(0).(func(uuid.UUID) post.PostI); ok {
+		r0 = rf(postId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(post.PostI)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(uuid.UUID) error); ok {
+		r1 = rf(postId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // UpdatePost provides a mock function with given fields: postId, req
 func (_m *PostServiceI) UpdatePost(postId uuid.UUID, req post.PostRequest) (post.PostI, error) {
 	ret := _m.Called(postId, req)

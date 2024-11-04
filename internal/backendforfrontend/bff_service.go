@@ -7,11 +7,14 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/comment"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/post"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type BffService struct {
-	repository PostAggregateRepositoryI
-	redisCache RedisRepositoryI
+	repository     PostAggregateRepositoryI
+	redisCache     RedisRepositoryI
+	postService    post.PostServiceI
+	commentService comment.CommentServiceI
 }
 
 type BffServiceI interface {
@@ -22,10 +25,17 @@ type BffServiceI interface {
 	UpdateCommentInPostAggregate(*comment.Comment)
 }
 
-func NewService(repository PostAggregateRepositoryI, redisCache RedisRepositoryI) *BffService {
+func NewService(
+	repository PostAggregateRepositoryI,
+	redisCache RedisRepositoryI,
+	postService post.PostServiceI,
+	commentService comment.CommentServiceI,
+) *BffService {
 	return &BffService{
-		repository: repository,
-		redisCache: redisCache,
+		repository,
+		redisCache,
+		postService,
+		commentService,
 	}
 }
 
@@ -37,7 +47,49 @@ func (s *BffService) GetPostAggregate(postId uuid.UUID) (PostAggregateI, error) 
 		return nil, err
 	}
 
-	return s.repository.FindById(postId)
+	postAggFromMongo, err := s.repository.FindById(postId)
+	if err == nil {
+		return postAggFromMongo, nil
+	} else if err != mongo.ErrNilDocument {
+		return nil, err
+	}
+
+	postChannel := make(chan post.PostI, 1)
+	commentsChannel := make(chan []comment.CommentI, 1)
+	errorChannel := make(chan error, 2)
+
+	go func() {
+		post, err := s.postService.FindById(postId)
+		if err != nil {
+			errorChannel <- err
+			return
+		}
+		postChannel <- post
+	}()
+
+	go func() {
+		comments, err := s.commentService.FindCommentsByPostId(postId)
+		if err != nil {
+			errorChannel <- err
+			return
+		}
+		commentsChannel <- comments
+	}()
+
+	var post post.PostI
+	var comments []comment.CommentI
+	for i := 0; i < 2; i++ {
+		select {
+		case p := <-postChannel:
+			post = p
+		case c := <-commentsChannel:
+			comments = c
+		case err := <-errorChannel:
+			return nil, err
+		}
+	}
+
+	return CreatePostAggregateWithComments(post, comments)
 }
 
 func (s *BffService) CreatePostAggregate(post *post.Post) {

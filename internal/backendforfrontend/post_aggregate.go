@@ -33,6 +33,23 @@ var CreatePostAggregate = func(post *post.Post) (PostAggregateI, error) {
 	}, nil
 }
 
+var CreatePostAggregateWithComments = func(postI post.PostI, commentsI []comment.CommentI) (PostAggregateI, error) {
+	var commentItems []CommentItem
+	post := postI.(*post.Post)
+
+	for _, commentI := range commentsI {
+		comment := commentI.(*comment.Comment)
+		commentItems = append(commentItems, CommentItem{comment.Id, comment.Content})
+	}
+
+	return &PostAggregate{
+		post.Id,
+		post.Content,
+		post.IsPrivate,
+		commentItems,
+	}, nil
+}
+
 func (a *PostAggregate) Update(post *post.Post) error {
 	a.Content = post.Content
 	a.IsPrivate = post.IsPrivate

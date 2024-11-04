@@ -17,6 +17,7 @@ type PostService struct {
 type PostServiceI interface {
 	CreatePost(req PostRequest) (PostI, error)
 	UpdatePost(postId uuid.UUID, req PostRequest) (PostI, error)
+	FindById(postId uuid.UUID) (PostI, error)
 }
 
 func NewService(repository PostRepositoryI, eventBus eventbus.EventBusI) *PostService {
@@ -46,7 +47,7 @@ func (s *PostService) CreatePost(req PostRequest) (PostI, error) {
 }
 
 func (s *PostService) UpdatePost(postId uuid.UUID, req PostRequest) (PostI, error) {
-	post, err := s.repository.FindByKey(postId)
+	post, err := s.repository.FindById(postId)
 	if err != nil {
 		return nil, errors.New("Post not found")
 	}
@@ -68,8 +69,12 @@ func (s *PostService) UpdatePost(postId uuid.UUID, req PostRequest) (PostI, erro
 	return post, nil
 }
 
+func (s *PostService) FindById(postId uuid.UUID) (PostI, error) {
+	return s.repository.FindById(postId)
+}
+
 func (s *PostService) IsPrivate(postId uuid.UUID) (bool, error) {
-	post, err := s.repository.FindByKey(postId)
+	post, err := s.repository.FindById(postId)
 	if err != nil {
 		return false, errors.New("Post not found")
 	}

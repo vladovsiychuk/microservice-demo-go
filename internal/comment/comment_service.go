@@ -18,6 +18,7 @@ type CommentService struct {
 type CommentServiceI interface {
 	CreateComment(req CommentRequest, postId uuid.UUID) (CommentI, error)
 	UpdateComment(req CommentRequest, commentId uuid.UUID) (CommentI, error)
+	FindCommentsByPostId(postId uuid.UUID) ([]CommentI, error)
 }
 
 func NewService(
@@ -57,7 +58,7 @@ func (s *CommentService) CreateComment(req CommentRequest, postId uuid.UUID) (Co
 }
 
 func (s *CommentService) UpdateComment(req CommentRequest, commentId uuid.UUID) (CommentI, error) {
-	comment, err := s.repository.FindByKey(commentId)
+	comment, err := s.repository.FindById(commentId)
 	if err != nil {
 		return nil, errors.New("Comment not found")
 	}
@@ -77,4 +78,8 @@ func (s *CommentService) UpdateComment(req CommentRequest, commentId uuid.UUID) 
 	})
 
 	return comment, nil
+}
+
+func (s *CommentService) FindCommentsByPostId(postId uuid.UUID) ([]CommentI, error) {
+	return s.repository.FindCommentsByPostId(postId)
 }

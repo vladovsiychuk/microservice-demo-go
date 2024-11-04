@@ -93,7 +93,7 @@ func TestUpdatePost(t *testing.T) {
 		{
 			name: "Success",
 			setupMocks: func() {
-				repository.On("FindByKey", mock.Anything).Return(mockedPost, nil).Once()
+				repository.On("FindById", mock.Anything).Return(mockedPost, nil).Once()
 				mockedPost.On("Update", mock.Anything).Return(nil).Once()
 				repository.On("Update", mock.Anything).Return(nil).Once()
 				eventbus.On("Publish", mock.Anything)
@@ -103,14 +103,14 @@ func TestUpdatePost(t *testing.T) {
 		{
 			name: "With DB FindByKey Error",
 			setupMocks: func() {
-				repository.On("FindByKey", mock.Anything).Return(nil, errFoo).Once()
+				repository.On("FindById", mock.Anything).Return(nil, errFoo).Once()
 			},
 			expectedError: errors.New("Post not found"),
 		},
 		{
 			name: "With post model Error",
 			setupMocks: func() {
-				repository.On("FindByKey", mock.Anything).Return(mockedPost, nil).Once()
+				repository.On("FindById", mock.Anything).Return(mockedPost, nil).Once()
 				mockedPost.On("Update", mock.Anything).Return(errFoo).Once()
 			},
 			expectedError: errFoo,
@@ -118,7 +118,7 @@ func TestUpdatePost(t *testing.T) {
 		{
 			name: "With DB Update Error",
 			setupMocks: func() {
-				repository.On("FindByKey", mock.Anything).Return(mockedPost, nil).Once()
+				repository.On("FindById", mock.Anything).Return(mockedPost, nil).Once()
 				mockedPost.On("Update", mock.Anything).Return(nil).Once()
 				repository.On("Update", mock.Anything).Return(errFoo).Once()
 			},

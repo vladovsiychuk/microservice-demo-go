@@ -7,17 +7,19 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/vladovsiychuk/microservice-demo-go/configs"
+	"github.com/vladovsiychuk/microservice-demo-go/internal/comment"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/post"
 	pgDriver "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func TestPostRepository(t *testing.T) {
+func TestPostgresRepository(t *testing.T) {
 	ctx := context.Background()
 
 	dbName := "testdb"
@@ -54,21 +56,52 @@ func TestPostRepository(t *testing.T) {
 	}
 
 	configs.SetupDbMigration(postgresDB)
-	repository := post.NewPostRepository(postgresDB)
+
+	/*
+	*
+	* Test Post Repository
+	*
+	 */
+	postRepository := post.NewPostRepository(postgresDB)
 
 	newPost, err := post.CreatePost(post.PostRequest{Content: "foo", IsPrivate: false})
 	if err != nil {
 		panic(err)
 	}
 
-	if err := repository.Create(newPost); err != nil {
+	if err := postRepository.Create(newPost); err != nil {
 		panic(err)
 	}
 
-	savedPost, err := repository.FindByKey(newPost.(*post.Post).Id)
+	savedPost, err := postRepository.FindById(newPost.(*post.Post).Id)
 	if err != nil {
 		panic(err)
 	}
 
 	assert.NotNil(t, savedPost)
+
+	/*
+	*
+	* Test Comment Repository
+	*
+	 */
+	commentRepository := comment.NewCommentRepository(postgresDB)
+	postId := uuid.New()
+
+	newComment, err := comment.CreateComment(comment.CommentRequest{Content: "hello"}, postId, false)
+	if err != nil {
+		panic(err)
+	}
+
+	if err := commentRepository.Create(newComment); err != nil {
+		panic(err)
+	}
+
+	savedComments, err := commentRepository.FindCommentsByPostId(postId)
+	if err != nil {
+		panic(err)
+	}
+
+	savedComment := savedComments[0]
+	assert.Equal(t, savedComment.(*comment.Comment).Content, "hello")
 }

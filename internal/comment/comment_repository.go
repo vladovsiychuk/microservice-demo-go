@@ -11,7 +11,8 @@ type CommentRepository struct {
 
 type CommentRepositoryI interface {
 	Create(comment CommentI) error
-	FindByKey(commentId uuid.UUID) (CommentI, error)
+	FindById(commentId uuid.UUID) (CommentI, error)
+	FindCommentsByPostId(postId uuid.UUID) ([]CommentI, error)
 	Update(comment CommentI) error
 }
 
@@ -25,10 +26,22 @@ func (r *CommentRepository) Create(comment CommentI) error {
 	return r.postgresDB.Create(comment).Error
 }
 
-func (r *CommentRepository) FindByKey(commentId uuid.UUID) (CommentI, error) {
+func (r *CommentRepository) FindById(commentId uuid.UUID) (CommentI, error) {
 	var comment Comment
 	err := r.postgresDB.Take(&comment, commentId).Error
 	return &comment, err
+}
+
+func (r *CommentRepository) FindCommentsByPostId(postId uuid.UUID) ([]CommentI, error) {
+	var comments []Comment
+	err := r.postgresDB.Find(&comments, "post_id = ?", postId).Error
+
+	var result []CommentI
+	for _, comment := range comments {
+		result = append(result, &comment)
+	}
+
+	return result, err
 }
 
 func (r *CommentRepository) Update(comment CommentI) error {
