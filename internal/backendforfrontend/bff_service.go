@@ -7,7 +7,6 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/comment"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/post"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type BffService struct {
@@ -54,10 +53,7 @@ func (s *BffService) CreatePostAggregate(post *post.Post) {
 
 func (s *BffService) UpdatePostAggregate(post *post.Post) {
 	postAgg, err := s.repository.FindById(post.Id)
-	if err == mongo.ErrNoDocuments {
-		s.CreatePostAggregate(post)
-		return
-	} else if err != nil {
+	if err != nil {
 		fmt.Printf("Error during post aggregate query: " + err.Error())
 	}
 
