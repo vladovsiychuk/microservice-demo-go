@@ -43,6 +43,7 @@ func (r *RedisRepository) UpdateCache(postAgg PostAggregateI) {
 	postData, err := json.Marshal(postAgg)
 	if err != nil {
 		fmt.Printf("Error during post aggregate serialization: " + err.Error())
+		return
 	}
 
 	postKey := fmt.Sprintf("post:%s", postAgg.(*PostAggregate).Id)

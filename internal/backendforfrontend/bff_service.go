@@ -44,6 +44,7 @@ func (s *BffService) CreatePostAggregate(post *post.Post) {
 	postAggregate, err := CreatePostAggregate(post)
 	if err != nil {
 		fmt.Printf("Error occured during the creation of post aggregate: " + err.Error())
+		return
 	}
 
 	if err := s.repository.Create(postAggregate); err != nil {
@@ -55,11 +56,13 @@ func (s *BffService) UpdatePostAggregate(post *post.Post) {
 	postAgg, err := s.repository.FindById(post.Id)
 	if err != nil {
 		fmt.Printf("Error during post aggregate query: " + err.Error())
+		return
 	}
 
 	postAgg.Update(post)
 	if err := s.repository.Update(postAgg); err != nil {
 		fmt.Printf("Error during post update: " + err.Error())
+		return
 	}
 
 	s.redisCache.UpdateCache(postAgg)
@@ -69,6 +72,7 @@ func (s *BffService) AddCommentToPostAggregate(comment *comment.Comment) {
 	postAgg, err := s.repository.FindById(comment.PostId)
 	if err != nil {
 		fmt.Printf("Error during post aggregate query: " + err.Error())
+		return
 	}
 
 	postAgg.AddComment(comment)
@@ -82,6 +86,7 @@ func (s *BffService) UpdateCommentInPostAggregate(comment *comment.Comment) {
 	postAgg, err := s.repository.FindById(comment.PostId)
 	if err != nil {
 		fmt.Printf("Error during post aggregate query: " + err.Error())
+		return
 	}
 
 	postAgg.UpdateComment(comment)
