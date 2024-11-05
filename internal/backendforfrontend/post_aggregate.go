@@ -14,7 +14,7 @@ type CommentItem struct {
 type PostAggregate struct {
 	Id        uuid.UUID     `json:"id" bson:"_id"`
 	Content   string        `json:"content"`
-	IsPrivate bool          `json:"is_private" bson:"is_private"`
+	IsPrivate bool          `json:"isPrivate" bson:"isPrivate"`
 	Comments  []CommentItem `json:"comments"`
 }
 
