@@ -101,7 +101,10 @@ func (s *BffService) CreatePostAggregate(post *post.Post) {
 
 	if err := s.repository.Create(postAggregate); err != nil {
 		fmt.Printf("Error when saving to mongo db: " + err.Error())
+		return
 	}
+
+	s.redisCache.UpdateCache(postAggregate)
 }
 
 func (s *BffService) UpdatePostAggregate(post *post.Post) {
@@ -130,8 +133,10 @@ func (s *BffService) AddCommentToPostAggregate(comment *comment.Comment) {
 	postAgg.AddComment(comment)
 	if err := s.repository.Update(postAgg); err != nil {
 		fmt.Printf("Error during post update: " + err.Error())
+		return
 	}
 
+	s.redisCache.UpdateCache(postAgg)
 }
 
 func (s *BffService) UpdateCommentInPostAggregate(comment *comment.Comment) {
@@ -144,5 +149,8 @@ func (s *BffService) UpdateCommentInPostAggregate(comment *comment.Comment) {
 	postAgg.UpdateComment(comment)
 	if err := s.repository.Update(postAgg); err != nil {
 		fmt.Printf("Error during post update: " + err.Error())
+		return
 	}
+
+	s.redisCache.UpdateCache(postAgg)
 }
