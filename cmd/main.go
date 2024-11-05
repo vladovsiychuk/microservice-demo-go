@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -20,20 +22,8 @@ import (
 func main() {
 	r := gin.Default()
 
-	// setup postgres DB
-	dsn := "host=localhost user=root password=rootpassword dbname=postgres port=5432 sslmode=disable"
-	postgresDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-
-	redisClient := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "", // No password set
-		DB:       0,  // Use default DB
-		Protocol: 2,  // Connection protocol
-	})
-
+	postgresDB := setupPostgres()
+	redisClient := setupRedis()
 	mongoDB := setupMongoDb()
 
 	eventBus := eventbus.NewEventBus()
@@ -88,12 +78,48 @@ func setupSubscribers(eventBus *eventbus.EventBus, eventHandler *backendforfront
 	go eventHandler.CommentUpdatedHandler(commentUpdatedChan)
 }
 
+func setupPostgres() *gorm.DB {
+	host := getEnv("POSTGRES_HOST", "localhost")
+	user := getEnv("POSTGRES_USER", "root")
+	password := getEnv("POSTGRES_PASSWORD", "rootpassword")
+	dbname := getEnv("POSTGRES_DB_NAME", "postgres")
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=5432 sslmode=disable", host, user, password, dbname)
+	postgresDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
+	}
+	return postgresDB
+}
+
+func setupRedis() *redis.Client {
+	host := getEnv("REDIS_HOST", "localhost")
+
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:6379", host),
+		Password: "",
+		DB:       0,
+		Protocol: 2,
+	})
+	return redisClient
+}
+
 func setupMongoDb() *mongo.Database {
-	uri := "mongodb://root:example@localhost:27017/test?authSource=admin"
+	host := getEnv("MONGODB_HOST", "localhost")
+
+	uri := fmt.Sprintf("mongodb://root:example@%s:27017/test?authSource=admin", host)
 	client, err := mongo.Connect(context.TODO(), options.Client().
 		ApplyURI(uri))
 	if err != nil {
 		panic(err)
 	}
 	return client.Database("test")
+}
+
+func getEnv(key, defaultValue string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
+	}
+	return value
 }

@@ -28,7 +28,9 @@ services:
   app:
     image: microservice-go:latest
     environment:
-      DB_URL: postgres
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+      MONGODB_HOST: mongo
     ports:
       - "8080:8080"
     depends_on:
