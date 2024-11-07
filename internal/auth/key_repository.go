@@ -14,7 +14,8 @@ func NewKeyRepository(postgresDB *gorm.DB) *KeyRepository {
 	}
 }
 
-func (r *KeyRepository) Create(keys KeysI) error {
+func (r *KeyRepository) Update(keys KeysI) error {
+	r.postgresDB.Delete(&Keys{}, "1 = 1")
 	return r.postgresDB.Create(keys).Error
 }
 

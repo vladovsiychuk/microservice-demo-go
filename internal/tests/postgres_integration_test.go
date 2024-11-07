@@ -119,7 +119,7 @@ func TestPostgresRepository(t *testing.T) {
 		panic(err)
 	}
 
-	if err := keysRepository.Create(newKeys); err != nil {
+	if err := keysRepository.Update(newKeys); err != nil {
 		panic(err)
 	}
 
