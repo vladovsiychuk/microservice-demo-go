@@ -13,6 +13,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/vladovsiychuk/microservice-demo-go/configs"
+	"github.com/vladovsiychuk/microservice-demo-go/internal/auth"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/comment"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/post"
 	pgDriver "gorm.io/driver/postgres"
@@ -104,4 +105,28 @@ func TestPostgresRepository(t *testing.T) {
 
 	savedComment := savedComments[0]
 	assert.Equal(t, savedComment.(*comment.Comment).Content, "hello")
+
+	/*
+	*
+	* Test Keys Repository
+	*
+	 */
+
+	keysRepository := auth.NewKeyRepository(postgresDB)
+
+	newKeys, err := auth.CreateKeys("a", "b", "c")
+	if err != nil {
+		panic(err)
+	}
+
+	if err := keysRepository.Create(newKeys); err != nil {
+		panic(err)
+	}
+
+	savedKeys, err := keysRepository.GetKeys()
+	if err != nil {
+		panic(err)
+	}
+
+	assert.Equal(t, savedKeys.(*auth.Keys).PrivateKey, "a")
 }
