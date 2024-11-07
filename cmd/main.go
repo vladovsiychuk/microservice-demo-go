@@ -3,9 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
+	"github.com/gorilla/sessions"
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/gothic"
+	"github.com/markbates/goth/providers/google"
 	"github.com/redis/go-redis/v9"
 	"github.com/vladovsiychuk/microservice-demo-go/configs"
 	backendforfrontend "github.com/vladovsiychuk/microservice-demo-go/internal/backendforfrontend"
@@ -19,8 +27,70 @@ import (
 	"gorm.io/gorm"
 )
 
+var jwtPrivateKey = getEnv("JWT_PRIVATE_KEY", "")
+var jwtSecret = []byte(jwtPrivateKey)
+
+func generateJWT(email string) (string, error) {
+	claims := jwt.MapClaims{
+		"email": email,
+		"exp":   time.Now().Add(time.Hour * 72).Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(jwtSecret)
+}
+
 func main() {
 	r := gin.Default()
+
+	sessionSecret := getEnv("SESSION_SECRET", "")
+	googleClientKey := getEnv("GOOGLE_OAUTH_CLIENT_KEY", "")
+	googleSecret := getEnv("GOOGLE_OAUTH_SECRET", "")
+
+	gothic.Store = sessions.NewCookieStore([]byte(sessionSecret))
+
+	goth.UseProviders(
+		google.New(
+			googleClientKey,
+			googleSecret,
+			"http://localhost:8080/auth/callback",
+			"email", "profile",
+		),
+	)
+
+	r.GET("/auth/login", func(c *gin.Context) {
+		c.Request = c.Request.WithContext(context.WithValue(c.Request.Context(), "provider", "google"))
+		gothic.BeginAuthHandler(c.Writer, c.Request)
+	})
+
+	r.GET("/auth/callback", func(c *gin.Context) {
+		user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication failed"})
+			return
+		}
+
+		token, err := generateJWT(user.Email)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Token generation failed"})
+			return
+		}
+
+		http.SetCookie(c.Writer, &http.Cookie{
+			Name:     "auth_token",
+			Value:    token,
+			Path:     "/",
+			HttpOnly: true,                    // Can't be accessed by JavaScript
+			Secure:   true,                    // Use Secure if using HTTPS
+			SameSite: http.SameSiteStrictMode, // Optional, for CSRF protection
+			MaxAge:   3600,                    // Token expiry (1 hour)
+		})
+
+		c.Redirect(http.StatusFound, "http://localhost:3000/dashboard")
+	})
+
+	r.GET("/protected", jwtAuthMiddleware, func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"message": "Welcome to the protected route!"})
+	})
 
 	postgresDB := setupPostgres()
 	redisClient := setupRedis()
@@ -32,6 +102,30 @@ func main() {
 	injectDependencies(postgresDB, mongoDB, redisClient, eventBus, r)
 
 	r.Run(":8080")
+}
+
+func jwtAuthMiddleware(c *gin.Context) {
+	tokenStr := c.GetHeader("Authorization")
+
+	if !strings.HasPrefix(tokenStr, "Bearer ") {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.Abort()
+		return
+	}
+
+	tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
+
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		return jwtSecret, nil
+	})
+
+	if err != nil || !token.Valid {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.Abort()
+		return
+	}
+
+	c.Next()
 }
 
 func injectDependencies(
