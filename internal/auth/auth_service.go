@@ -32,20 +32,7 @@ func NewService(keyRepository KeyRepositoryI) *AuthService {
 }
 
 func (s *AuthService) Init() {
-	sessionSecret := helper.GetEnv("SESSION_SECRET", "")
-	googleClientKey := helper.GetEnv("GOOGLE_OAUTH_CLIENT_KEY", "")
-	googleSecret := helper.GetEnv("GOOGLE_OAUTH_SECRET", "")
-
-	gothic.Store = sessions.NewCookieStore([]byte(sessionSecret))
-
-	goth.UseProviders(
-		google.New(
-			googleClientKey,
-			googleSecret,
-			"http://localhost:8080/auth/callback",
-			"email", "profile",
-		),
-	)
+	initOauthProvides()
 
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
@@ -71,6 +58,23 @@ func (s *AuthService) Init() {
 	if err := s.keyRepository.Update(keys); err != nil {
 		panic("Can't save keys in the repository.")
 	}
+}
+
+func initOauthProvides() {
+	sessionSecret := helper.GetEnv("SESSION_SECRET", "")
+	googleClientKey := helper.GetEnv("GOOGLE_OAUTH_CLIENT_KEY", "")
+	googleSecret := helper.GetEnv("GOOGLE_OAUTH_SECRET", "")
+
+	gothic.Store = sessions.NewCookieStore([]byte(sessionSecret))
+
+	goth.UseProviders(
+		google.New(
+			googleClientKey,
+			googleSecret,
+			"http://localhost:8080/auth/callback",
+			"email", "profile",
+		),
+	)
 }
 
 func (s *AuthService) GenerateJwt(email string) (string, error) {
