@@ -12,7 +12,7 @@ CREATE TABLE comments (
 );
 
 CREATE TABLE keys (
-    private_key varchar(100) NOT NULL,
-    public_key varchar(100) NOT NULL,
-    secondary_public_key varchar(100) NOT NULL
+    private_key text NOT NULL,
+    public_key text NOT NULL,
+    secondary_public_key text NOT NULL
 );
