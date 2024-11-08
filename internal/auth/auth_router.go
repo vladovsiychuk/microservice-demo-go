@@ -54,5 +54,5 @@ func (h *AuthRouter) callback(c *gin.Context) {
 		MaxAge:   3600,                    // Token expiry (1 hour)
 	})
 
-	c.Redirect(http.StatusFound, "http://localhost:3000/dashboard")
+	c.Redirect(http.StatusFound, "/dashboard")
 }
