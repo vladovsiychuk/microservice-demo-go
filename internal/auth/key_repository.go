@@ -6,7 +6,9 @@ type KeyRepository struct {
 	postgresDB *gorm.DB
 }
 
-type KeyRepositoryI interface{}
+type KeyRepositoryI interface {
+	GetKeys() (KeysI, error)
+}
 
 func NewKeyRepository(postgresDB *gorm.DB) *KeyRepository {
 	return &KeyRepository{
