@@ -44,9 +44,6 @@ func (s *AuthService) Init() {
 	privateKeyBytes := x509.MarshalPKCS1PrivateKey(privateKey)
 	publicKeyBytes := x509.MarshalPKCS1PublicKey(publicKey)
 
-	fmt.Println("private key bytes:", privateKeyBytes)
-	fmt.Println("public key bytes:", publicKeyBytes)
-
 	privateKeyStr := base64.StdEncoding.EncodeToString(privateKeyBytes)
 	publicKeyStr := base64.StdEncoding.EncodeToString(publicKeyBytes)
 
