@@ -49,7 +49,7 @@ func (h *AuthRouter) callback(c *gin.Context) {
 		Name:     "auth_token",
 		Value:    token,
 		Path:     "/",
-		HttpOnly: true,                    // Can't be accessed by JavaScript
+		HttpOnly: false,                   // Can't be accessed by JavaScript
 		Secure:   true,                    // Use Secure if using HTTPS
 		SameSite: http.SameSiteStrictMode, // Optional, for CSRF protection
 		MaxAge:   3600,                    // Token expiry (1 hour)
