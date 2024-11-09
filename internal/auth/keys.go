@@ -14,9 +14,28 @@ type Keys struct {
 }
 
 type KeysI interface {
+	Rotate()
 }
 
 var CreateKeys = func() KeysI {
+	privateKeyStr, publicKeyStr := generateRandomKeys()
+
+	return &Keys{
+		privateKeyStr,
+		publicKeyStr,
+		publicKeyStr,
+	}
+}
+
+func (k *Keys) Rotate() {
+	privateKeyStr, publicKeyStr := generateRandomKeys()
+
+	k.PrivateKey = privateKeyStr
+	k.SecondaryPublicKey = k.PublicKey
+	k.PublicKey = publicKeyStr
+}
+
+func generateRandomKeys() (string, string) {
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		panic("Failed to generate private key: " + err.Error())
@@ -29,10 +48,5 @@ var CreateKeys = func() KeysI {
 
 	privateKeyStr := base64.StdEncoding.EncodeToString(privateKeyBytes)
 	publicKeyStr := base64.StdEncoding.EncodeToString(publicKeyBytes)
-
-	return &Keys{
-		privateKeyStr,
-		publicKeyStr,
-		publicKeyStr,
-	}
+	return privateKeyStr, publicKeyStr
 }

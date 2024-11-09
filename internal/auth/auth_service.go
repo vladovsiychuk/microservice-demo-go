@@ -38,6 +38,21 @@ func (s *AuthService) Init() {
 	if err := s.keyRepository.Update(keys); err != nil {
 		panic("Can't save keys in the repository.")
 	}
+
+	s.startKeyRotation()
+}
+
+func (s *AuthService) startKeyRotation() {
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			keys, _ := s.keyRepository.GetKeys()
+			keys.Rotate()
+			s.keyRepository.Update(keys)
+		}
+	}()
 }
 
 func initOauthProviders() {
