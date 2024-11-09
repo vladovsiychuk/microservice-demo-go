@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/base64"
@@ -32,22 +31,9 @@ func NewService(keyRepository KeyRepositoryI) *AuthService {
 }
 
 func (s *AuthService) Init() {
-	initOauthProvides()
+	initOauthProviders()
 
-	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		panic("Failed to generate private key: " + err.Error())
-	}
-
-	publicKey := &privateKey.PublicKey
-
-	privateKeyBytes := x509.MarshalPKCS1PrivateKey(privateKey)
-	publicKeyBytes := x509.MarshalPKCS1PublicKey(publicKey)
-
-	privateKeyStr := base64.StdEncoding.EncodeToString(privateKeyBytes)
-	publicKeyStr := base64.StdEncoding.EncodeToString(publicKeyBytes)
-
-	keys, err := CreateKeys(privateKeyStr, publicKeyStr, publicKeyStr)
+	keys, err := CreateKeys()
 	if err != nil {
 		panic("Failed to create keys.")
 	}
@@ -57,7 +43,7 @@ func (s *AuthService) Init() {
 	}
 }
 
-func initOauthProvides() {
+func initOauthProviders() {
 	sessionSecret := helper.GetEnv("SESSION_SECRET", "")
 	googleClientKey := helper.GetEnv("GOOGLE_OAUTH_CLIENT_KEY", "")
 	googleSecret := helper.GetEnv("GOOGLE_OAUTH_SECRET", "")

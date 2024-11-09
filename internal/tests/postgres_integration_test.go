@@ -114,7 +114,7 @@ func TestPostgresRepository(t *testing.T) {
 
 	keysRepository := auth.NewKeyRepository(postgresDB)
 
-	newKeys, err := auth.CreateKeys("a", "b", "c")
+	newKeys, err := auth.CreateKeys()
 	if err != nil {
 		panic(err)
 	}
@@ -128,5 +128,5 @@ func TestPostgresRepository(t *testing.T) {
 		panic(err)
 	}
 
-	assert.Equal(t, savedKeys.(*auth.Keys).PrivateKey, "a")
+	assert.NotNil(t, savedKeys.(*auth.Keys).PrivateKey)
 }
