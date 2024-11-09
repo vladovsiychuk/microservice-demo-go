@@ -23,6 +23,7 @@ func (h *AuthRouter) RegisterRoutes(r *gin.Engine) {
 	{
 		postGroup.GET("/login", h.login)
 		postGroup.GET("/callback", h.callback)
+		postGroup.GET("/logout", h.logout)
 	}
 }
 
@@ -55,4 +56,23 @@ func (h *AuthRouter) callback(c *gin.Context) {
 	})
 
 	c.Redirect(http.StatusFound, "http://localhost:3000/dashboard")
+}
+
+func (h *AuthRouter) logout(c *gin.Context) {
+	err := gothic.Logout(c.Writer, c.Request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Logout failed"})
+		return
+	}
+
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "auth_token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		MaxAge:   -1,
+	})
+
+	c.Redirect(http.StatusFound, "http://localhost:3000")
 }
