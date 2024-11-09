@@ -16,7 +16,7 @@ type Keys struct {
 type KeysI interface {
 }
 
-var CreateKeys = func() (KeysI, error) {
+var CreateKeys = func() KeysI {
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		panic("Failed to generate private key: " + err.Error())
@@ -34,5 +34,5 @@ var CreateKeys = func() (KeysI, error) {
 		privateKeyStr,
 		publicKeyStr,
 		publicKeyStr,
-	}, nil
+	}
 }

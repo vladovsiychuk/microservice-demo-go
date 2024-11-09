@@ -33,10 +33,7 @@ func NewService(keyRepository KeyRepositoryI) *AuthService {
 func (s *AuthService) Init() {
 	initOauthProviders()
 
-	keys, err := CreateKeys()
-	if err != nil {
-		panic("Failed to create keys.")
-	}
+	keys := CreateKeys()
 
 	if err := s.keyRepository.Update(keys); err != nil {
 		panic("Can't save keys in the repository.")

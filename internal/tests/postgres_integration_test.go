@@ -114,10 +114,7 @@ func TestPostgresRepository(t *testing.T) {
 
 	keysRepository := auth.NewKeyRepository(postgresDB)
 
-	newKeys, err := auth.CreateKeys()
-	if err != nil {
-		panic(err)
-	}
+	newKeys := auth.CreateKeys()
 
 	if err := keysRepository.Update(newKeys); err != nil {
 		panic(err)
