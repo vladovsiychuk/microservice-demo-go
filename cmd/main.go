@@ -22,6 +22,7 @@ import (
 
 func main() {
 	r := gin.Default()
+	r.Use(configs.CORSMiddleware())
 
 	postgresDB := setupPostgres()
 	redisClient := setupRedis()
