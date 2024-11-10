@@ -9,6 +9,11 @@ type KeysI struct {
 	mock.Mock
 }
 
+// Rotate provides a mock function with given fields:
+func (_m *KeysI) Rotate() {
+	_m.Called()
+}
+
 // NewKeysI creates a new instance of KeysI. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewKeysI(t interface {

@@ -126,4 +126,34 @@ func TestPostgresRepository(t *testing.T) {
 	}
 
 	assert.NotNil(t, savedKeys.(*auth.Keys).PrivateKey)
+
+	/*
+	*
+	* Session Tokens Repository
+	*
+	 */
+
+	sessionTokensRepository := auth.NewSessionTokenRepository(postgresDB)
+
+	newSessionToken := auth.CreateSessionToken()
+
+	if err := sessionTokensRepository.Create(newSessionToken); err != nil {
+		panic(err)
+	}
+
+	savedSessionToken, err := sessionTokensRepository.FindById(newSessionToken.(*auth.SessionToken).Id)
+	if err != nil {
+		panic(err)
+	}
+
+	assert.NotNil(t, savedSessionToken.(*auth.SessionToken).Id)
+	assert.False(t, savedSessionToken.(*auth.SessionToken).ExpiresAt.Before(time.Now()))
+
+	if err := sessionTokensRepository.Delete(savedSessionToken); err != nil {
+		panic(err)
+	}
+
+	_, err = sessionTokensRepository.FindById(newSessionToken.(*auth.SessionToken).Id)
+
+	assert.NotNil(t, err)
 }
