@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
@@ -16,17 +17,20 @@ import (
 )
 
 type AuthService struct {
-	keyRepository KeyRepositoryI
+	keyRepository          KeyRepositoryI
+	sessionTokenRepository SessionTokenRepositoryI
 }
 
 type AuthServiceI interface {
 	GenerateJwtAndSessionTokens(email string) (string, SessionTokenI, error)
+	RefreshJwtAndSessionTokens(sessionTokenId uuid.UUID) (string, SessionTokenI, error)
 	TokenIsValid(tokenStr string) bool
 }
 
-func NewService(keyRepository KeyRepositoryI) *AuthService {
+func NewService(keyRepository KeyRepositoryI, sessionTokenRepository SessionTokenRepositoryI) *AuthService {
 	return &AuthService{
 		keyRepository,
+		sessionTokenRepository,
 	}
 }
 
@@ -44,7 +48,7 @@ func (s *AuthService) Init() {
 
 func (s *AuthService) startKeyRotation() {
 	go func() {
-		ticker := time.NewTicker(10 * time.Second)
+		ticker := time.NewTicker(JWT_KEYS_DURATION)
 		defer ticker.Stop()
 
 		for range ticker.C {
@@ -73,25 +77,43 @@ func initOauthProviders() {
 }
 
 func (s *AuthService) GenerateJwtAndSessionTokens(email string) (string, SessionTokenI, error) {
-	keys, err := s.keyRepository.GetKeys()
+	jwtTokenStr, err := s.generateJwtTokenStr(email)
 	if err != nil {
-		return "", "", err
+		return "", nil, err
 	}
 
-	privateKey, err := decodeBase64PrivateKey(keys.(*Keys).PrivateKey)
+	sessionToken := CreateSessionToken(email)
+	return jwtTokenStr, sessionToken, err
+}
+
+func (s *AuthService) RefreshJwtAndSessionTokens(sessionTokenId uuid.UUID) (string, SessionTokenI, error) {
+	currentSessionTokenI, err := s.sessionTokenRepository.FindById(sessionTokenId)
+	currentSessionToken := currentSessionTokenI.(*SessionToken)
 	if err != nil {
-		return "", "", err
+		// Something went wrong, the session token was most likely stolen.
+		// Because it's quite strange that frontend has sent a token that was deleted
+		// if it was deleted means that it was used.
+		// The best thing to do here is to delete all current user sessions (all session tokens by user id/email)
+		// from the repository.
+		// And redirect the user to the login page (return error)
+		return "", nil, err
 	}
 
-	claims := jwt.MapClaims{
-		"email": email,
-		"exp":   time.Now().Add(time.Hour * 72).Unix(),
+	newSessionToken := CreateSessionToken(currentSessionToken.Email)
+	newJwtTokenStr, err := s.generateJwtTokenStr(currentSessionToken.Email)
+	if err != nil {
+		return "", nil, err
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	signedTokenStr, err := token.SignedString(privateKey)
 
-	sessionToken := CreateSessionToken()
-	return signedTokenStr, sessionToken, err
+	if err := s.sessionTokenRepository.Delete(currentSessionTokenI); err != nil {
+		return "", nil, err
+	}
+
+	if err := s.sessionTokenRepository.Create(newSessionToken); err != nil {
+		return "", nil, err
+	}
+
+	return newJwtTokenStr, newSessionToken, nil
 }
 
 func (s *AuthService) TokenIsValid(tokenStr string) bool {
@@ -120,6 +142,24 @@ func (s *AuthService) TokenIsValid(tokenStr string) bool {
 	}
 
 	return true
+}
+
+func (s *AuthService) generateJwtTokenStr(email string) (string, error) {
+	keys, err := s.keyRepository.GetKeys()
+	if err != nil {
+		return "", err
+	}
+
+	privateKey, err := decodeBase64PrivateKey(keys.(*Keys).PrivateKey)
+	if err != nil {
+		return "", err
+	}
+
+	claims := jwt.MapClaims{
+		"email": email,
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	return token.SignedString(privateKey)
 }
 
 func decodeBase64PrivateKey(encodedKey string) (*rsa.PrivateKey, error) {

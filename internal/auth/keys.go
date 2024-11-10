@@ -5,6 +5,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/base64"
+	"time"
 )
 
 type Keys struct {
@@ -16,6 +17,8 @@ type Keys struct {
 type KeysI interface {
 	Rotate()
 }
+
+var JWT_KEYS_DURATION = 10 * time.Second
 
 var CreateKeys = func() KeysI {
 	privateKeyStr, publicKeyStr := generateRandomKeys()

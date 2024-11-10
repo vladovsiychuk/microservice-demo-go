@@ -135,7 +135,7 @@ func TestPostgresRepository(t *testing.T) {
 
 	sessionTokensRepository := auth.NewSessionTokenRepository(postgresDB)
 
-	newSessionTokenI := auth.CreateSessionToken()
+	newSessionTokenI := auth.CreateSessionToken("test@mail.com")
 
 	if err := sessionTokensRepository.Create(newSessionTokenI); err != nil {
 		panic(err)

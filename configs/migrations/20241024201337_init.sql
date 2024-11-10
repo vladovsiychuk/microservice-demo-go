@@ -19,5 +19,6 @@ CREATE TABLE keys (
 
 CREATE TABLE session_tokens (
     id uuid PRIMARY KEY,
+    email varchar(100),
     expires_at timestamptz NOT NULL
 );

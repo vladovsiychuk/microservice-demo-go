@@ -10,6 +10,9 @@ type SessionTokenRepository struct {
 }
 
 type SessionTokenRepositoryI interface {
+	Create(sessionToken SessionTokenI) error
+	FindById(sessionTokenId uuid.UUID) (SessionTokenI, error)
+	Delete(sessionToken SessionTokenI) error
 }
 
 func NewSessionTokenRepository(postgresDB *gorm.DB) *SessionTokenRepository {
