@@ -13,9 +13,11 @@ type SessionToken struct {
 
 type SessionTokenI interface{}
 
+var SESSION_TOKEN_DURATION = 10 * time.Second
+
 var CreateSessionToken = func() SessionTokenI {
 	return &SessionToken{
 		uuid.New(),
-		time.Now().Add(5 * time.Minute),
+		time.Now().Add(SESSION_TOKEN_DURATION),
 	}
 }

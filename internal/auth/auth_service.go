@@ -20,7 +20,7 @@ type AuthService struct {
 }
 
 type AuthServiceI interface {
-	GenerateJwt(email string) (string, error)
+	GenerateJwtAndSessionTokens(email string) (string, SessionTokenI, error)
 	TokenIsValid(tokenStr string) bool
 }
 
@@ -72,15 +72,15 @@ func initOauthProviders() {
 	)
 }
 
-func (s *AuthService) GenerateJwt(email string) (string, error) {
+func (s *AuthService) GenerateJwtAndSessionTokens(email string) (string, SessionTokenI, error) {
 	keys, err := s.keyRepository.GetKeys()
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	privateKey, err := decodeBase64PrivateKey(keys.(*Keys).PrivateKey)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	claims := jwt.MapClaims{
@@ -88,7 +88,10 @@ func (s *AuthService) GenerateJwt(email string) (string, error) {
 		"exp":   time.Now().Add(time.Hour * 72).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	return token.SignedString(privateKey)
+	signedTokenStr, err := token.SignedString(privateKey)
+
+	sessionToken := CreateSessionToken()
+	return signedTokenStr, sessionToken, err
 }
 
 func (s *AuthService) TokenIsValid(tokenStr string) bool {

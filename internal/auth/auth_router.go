@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"
@@ -39,7 +40,7 @@ func (h *AuthRouter) callback(c *gin.Context) {
 		return
 	}
 
-	token, err := h.service.GenerateJwt(user.Email)
+	jwtTokenStr, sessionToken, err := h.service.GenerateJwtAndSessionTokens(user.Email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Token generation failed"})
 		return
@@ -47,12 +48,22 @@ func (h *AuthRouter) callback(c *gin.Context) {
 
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:     "auth_token",
-		Value:    token,
+		Value:    jwtTokenStr,
 		Path:     "/",
 		HttpOnly: false,                   // Can't be accessed by JavaScript
 		Secure:   true,                    // Use Secure if using HTTPS
 		SameSite: http.SameSiteStrictMode, // Optional, for CSRF protection
 		MaxAge:   3600,                    // Token expiry (1 hour)
+	})
+
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "session_token_id",
+		Value:    sessionToken.(*SessionToken).Id.String(),
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+		Expires:  time.Now().Add(SESSION_TOKEN_DURATION),
 	})
 
 	c.Redirect(http.StatusFound, "http://localhost:3000/dashboard")
