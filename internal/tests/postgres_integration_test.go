@@ -135,25 +135,29 @@ func TestPostgresRepository(t *testing.T) {
 
 	sessionTokensRepository := auth.NewSessionTokenRepository(postgresDB)
 
-	newSessionToken := auth.CreateSessionToken()
+	newSessionTokenI := auth.CreateSessionToken()
 
-	if err := sessionTokensRepository.Create(newSessionToken); err != nil {
+	if err := sessionTokensRepository.Create(newSessionTokenI); err != nil {
 		panic(err)
 	}
 
-	savedSessionToken, err := sessionTokensRepository.FindById(newSessionToken.(*auth.SessionToken).Id)
+	newSessionToken := newSessionTokenI.(*auth.SessionToken)
+
+	savedSessionTokenI, err := sessionTokensRepository.FindById(newSessionToken.Id)
 	if err != nil {
 		panic(err)
 	}
 
-	assert.NotNil(t, savedSessionToken.(*auth.SessionToken).Id)
-	assert.False(t, savedSessionToken.(*auth.SessionToken).ExpiresAt.Before(time.Now()))
+	savedSessionToken := savedSessionTokenI.(*auth.SessionToken)
 
-	if err := sessionTokensRepository.Delete(savedSessionToken); err != nil {
+	assert.NotNil(t, savedSessionToken.Id)
+	assert.False(t, savedSessionToken.ExpiresAt.Before(time.Now()))
+
+	if err := sessionTokensRepository.Delete(savedSessionTokenI); err != nil {
 		panic(err)
 	}
 
-	_, err = sessionTokensRepository.FindById(newSessionToken.(*auth.SessionToken).Id)
+	_, err = sessionTokensRepository.FindById(newSessionToken.Id)
 
 	assert.NotNil(t, err)
 }
