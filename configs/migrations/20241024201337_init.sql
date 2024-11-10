@@ -16,3 +16,8 @@ CREATE TABLE keys (
     public_key text NOT NULL,
     secondary_public_key text NOT NULL
 );
+
+CREATE TABLE session_tokens (
+    id uuid PRIMARY KEY,
+    expires_at timestamptz NOT NULL
+);
