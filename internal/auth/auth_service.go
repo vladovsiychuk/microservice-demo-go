@@ -138,8 +138,23 @@ func (s *AuthService) TokenIsValid(tokenStr string) bool {
 	})
 
 	if err != nil || !token.Valid {
-		fmt.Printf("Token is not valid.")
-		return false
+		secondayPublicKey, err := keys.GetSecondaryPulicKey()
+		if err != nil {
+			fmt.Printf("Failed to decode secondary public key.")
+			return false
+		}
+
+		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			return secondayPublicKey, nil
+		})
+
+		if err != nil || !token.Valid {
+			fmt.Printf("Token is not valid.")
+			return false
+		}
 	}
 
 	return true
