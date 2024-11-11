@@ -43,8 +43,10 @@ func injectDependencies(
 	eventBus *eventbus.EventBus,
 	r *gin.Engine,
 ) {
+	sessionTokenRepository := auth.NewSessionTokenRepository(postgresDB)
+
 	authRepository := auth.NewKeyRepository(postgresDB)
-	authService := auth.NewService(authRepository)
+	authService := auth.NewService(authRepository, sessionTokenRepository)
 	authService.Init()
 	authHandler := auth.NewRouter(authService)
 	authHandler.RegisterRoutes(r)

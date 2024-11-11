@@ -16,12 +16,15 @@ type Keys struct {
 
 type KeysI interface {
 	Rotate()
+	GetPrivateKey() (*rsa.PrivateKey, error)
+	GetPublicKey() (*rsa.PublicKey, error)
+	GetSecondaryPulicKey() (*rsa.PublicKey, error)
 }
 
 var JWT_KEYS_DURATION = 10 * time.Second
 
 var CreateKeys = func() KeysI {
-	privateKeyStr, publicKeyStr := generateRandomKeys()
+	privateKeyStr, publicKeyStr := generateRandomKeyStrs()
 
 	return &Keys{
 		privateKeyStr,
@@ -31,14 +34,26 @@ var CreateKeys = func() KeysI {
 }
 
 func (k *Keys) Rotate() {
-	privateKeyStr, publicKeyStr := generateRandomKeys()
+	privateKeyStr, publicKeyStr := generateRandomKeyStrs()
 
 	k.PrivateKey = privateKeyStr
 	k.SecondaryPublicKey = k.PublicKey
 	k.PublicKey = publicKeyStr
 }
 
-func generateRandomKeys() (string, string) {
+func (k *Keys) GetPrivateKey() (*rsa.PrivateKey, error) {
+	return decodeBase64PrivateKey(k.PrivateKey)
+}
+
+func (k *Keys) GetPublicKey() (*rsa.PublicKey, error) {
+	return decodeBase64PublicKey(k.PublicKey)
+}
+
+func (k *Keys) GetSecondaryPulicKey() (*rsa.PublicKey, error) {
+	return decodeBase64PublicKey(k.SecondaryPublicKey)
+}
+
+func generateRandomKeyStrs() (string, string) {
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		panic("Failed to generate private key: " + err.Error())
@@ -52,4 +67,28 @@ func generateRandomKeys() (string, string) {
 	privateKeyStr := base64.StdEncoding.EncodeToString(privateKeyBytes)
 	publicKeyStr := base64.StdEncoding.EncodeToString(publicKeyBytes)
 	return privateKeyStr, publicKeyStr
+}
+
+func decodeBase64PrivateKey(encodedKey string) (*rsa.PrivateKey, error) {
+	decodedKey, err := base64.StdEncoding.DecodeString(encodedKey)
+	if err != nil {
+		return nil, err
+	}
+	privateKey, err := x509.ParsePKCS1PrivateKey(decodedKey)
+	if err != nil {
+		return nil, err
+	}
+	return privateKey, nil
+}
+
+func decodeBase64PublicKey(encodedKey string) (*rsa.PublicKey, error) {
+	decodedKey, err := base64.StdEncoding.DecodeString(encodedKey)
+	if err != nil {
+		return nil, err
+	}
+	publicKey, err := x509.ParsePKCS1PublicKey(decodedKey)
+	if err != nil {
+		return nil, err
+	}
+	return publicKey, nil
 }

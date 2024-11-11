@@ -125,7 +125,12 @@ func TestPostgresRepository(t *testing.T) {
 		panic(err)
 	}
 
-	assert.NotNil(t, savedKeys.(*auth.Keys).PrivateKey)
+	privateKey, err := savedKeys.GetPrivateKey()
+	if err != nil {
+		panic(err)
+	}
+
+	assert.NotNil(t, privateKey)
 
 	/*
 	*

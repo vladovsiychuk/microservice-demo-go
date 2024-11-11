@@ -8,10 +8,16 @@ import (
 )
 
 func TestRotation(t *testing.T) {
-	var keys = &auth.Keys{PrivateKey: "a", PublicKey: "b", SecondaryPublicKey: "c"}
+	keys := auth.CreateKeys()
+
+	initialPrivateKey, _ := keys.GetPrivateKey()
+	initialPublicKey, _ := keys.GetPublicKey()
 
 	keys.Rotate()
 
-	assert.Equal(t, keys.SecondaryPublicKey, "b")
-	assert.NotEqual(t, keys.PrivateKey, "a")
+	privateKey, _ := keys.GetPrivateKey()
+	secondaryPublicKey, _ := keys.GetSecondaryPulicKey()
+
+	assert.Equal(t, secondaryPublicKey, initialPublicKey)
+	assert.NotEqual(t, privateKey, initialPrivateKey)
 }
