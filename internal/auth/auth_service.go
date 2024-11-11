@@ -80,6 +80,10 @@ func (s *AuthService) GenerateJwtAndSessionTokens(email string) (string, Session
 	}
 
 	sessionToken := CreateSessionToken(email)
+	if err := s.sessionTokenRepository.Create(sessionToken); err != nil {
+		return "", nil, err
+	}
+
 	return jwtTokenStr, sessionToken, err
 }
 
