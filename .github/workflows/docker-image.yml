@@ -25,9 +25,6 @@ jobs:
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
     - name: Build Docker Image
-      run: docker build -t ghcr.io/${{ github.repository_owner }}/microservice-demo-go:latest .
-    
-    - name: Build Docker Image
       run: docker build -t ghcr.io/${{ github.repository }}:latest .
 
     - name: Push Docker Image
