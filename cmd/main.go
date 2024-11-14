@@ -12,6 +12,7 @@ import (
 	"github.com/vladovsiychuk/microservice-demo-go/internal/comment"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/post"
 	"github.com/vladovsiychuk/microservice-demo-go/internal/shared"
+	websocketserver "github.com/vladovsiychuk/microservice-demo-go/internal/websocket_server"
 	eventbus "github.com/vladovsiychuk/microservice-demo-go/pkg/event-bus"
 	"github.com/vladovsiychuk/microservice-demo-go/pkg/helper"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -68,6 +69,10 @@ func injectDependencies(
 	bffRouter.RegisterRoutes(r)
 	eventHandler := backendforfrontend.NewEventHandler(bffService)
 	setupSubscribers(eventBus, eventHandler)
+
+	websocketService := websocketserver.NewService()
+	websocketHander := websocketserver.NewRouter(websocketService)
+	websocketHander.RegisterRoutes(r)
 }
 
 func setupSubscribers(eventBus *eventbus.EventBus, eventHandler *backendforfrontend.EventHandler) {
