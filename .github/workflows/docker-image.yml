@@ -27,8 +27,8 @@ jobs:
     - name: Build Docker Image
       run: docker build -t ghcr.io/${{ github.repository_owner }}/microservice-demo-go:latest .
     
-    - name: Tag Docker image
-      run: docker tag mmorpg ghcr.io/${{ github.repository_owner }}/microservice-demo-go:latest
+    - name: Build Docker Image
+      run: docker build -t ghcr.io/${{ github.repository }}:latest .
 
-    - name: Push Docker image to GitHub Container Registry
-      run: docker push ghcr.io/${{ github.repository_owner }}/microservice-demo-go:latest
+    - name: Push Docker Image
+      run: docker push ghcr.io/${{ github.repository }}:latest
