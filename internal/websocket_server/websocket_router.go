@@ -1,57 +1,47 @@
 package websocketserver
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
+	"github.com/google/uuid"
+	"github.com/vladovsiychuk/microservice-demo-go/pkg/websockets"
 )
 
-type WebSocketRouter struct{}
+type WebSocketRouter struct {
+	service *WsService
+}
 
 type Message struct {
 	Type    string `json:"type"`
 	Content string `json:"content"`
 }
 
-func NewRouter() *WebSocketRouter {
-	return &WebSocketRouter{}
+func NewRouter(service *WsService) *WebSocketRouter {
+	return &WebSocketRouter{
+		service: service,
+	}
 }
 
 func (w *WebSocketRouter) RegisterRoutes(r *gin.Engine) {
-	r.GET("/ws", w.handleWebSocket)
-}
-
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
+	r.GET("/ws/rooms/:roomId/users/:userId", w.handleWebSocket)
 }
 
 func (w *WebSocketRouter) handleWebSocket(c *gin.Context) {
-	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	roomIdStr := c.Param("roomId")
+	roomId, err := uuid.Parse(roomIdStr)
 	if err != nil {
-		log.Println("Failed to upgrade to websocket:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid room ID format"})
 		return
 	}
-	defer ws.Close()
 
-	for {
-		var message Message
-
-		err := ws.ReadJSON(&message)
-		if err != nil {
-			log.Println("Error reading message:", err)
-			return
-		}
-
-		response := Message{
-			Type:    "response",
-			Content: fmt.Sprintf("Received: %s", message.Content),
-		}
-		if err := ws.WriteJSON(response); err != nil {
-			log.Println("Error writing JSON response:", err)
-			break
-		}
+	userIdStr := c.Param("userId")
+	userId, err := uuid.Parse(userIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
+		return
 	}
+
+	room := w.service.GetOrCreateRoom(roomId)
+	websockets.CreateClient(room, userId, c.Writer, c.Request)
 }

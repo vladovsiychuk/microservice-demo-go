@@ -60,7 +60,8 @@ func injectDependencies(
 	eventHandler := backendforfrontend.NewEventHandler(bffService)
 	setupSubscribers(eventBus, eventHandler)
 
-	websocketHander := websocketserver.NewRouter()
+	websocketService := websocketserver.NewService()
+	websocketHander := websocketserver.NewRouter(websocketService)
 	websocketHander.RegisterRoutes(r)
 }
 
