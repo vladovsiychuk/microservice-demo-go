@@ -5,11 +5,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/vladovsiychuk/microservice-demo-go/internal/auth"
 	"github.com/vladovsiychuk/microservice-demo-go/pkg/websockets"
 )
 
 type WebSocketRouter struct {
-	service *WsService
+	service     *WsService
+	authService auth.AuthServiceI
 }
 
 type Message struct {
@@ -17,14 +19,15 @@ type Message struct {
 	Content string `json:"content"`
 }
 
-func NewRouter(service *WsService) *WebSocketRouter {
+func NewRouter(service *WsService, authService auth.AuthServiceI) *WebSocketRouter {
 	return &WebSocketRouter{
-		service: service,
+		service:     service,
+		authService: authService,
 	}
 }
 
 func (w *WebSocketRouter) RegisterRoutes(r *gin.Engine) {
-	r.GET("/ws/rooms/:roomId/users/:userId", w.handleWebSocket)
+	r.GET("/ws/rooms/:roomId/users/:userId", w.jwtAuthMiddleware, w.handleWebSocket)
 }
 
 func (w *WebSocketRouter) handleWebSocket(c *gin.Context) {
@@ -44,4 +47,18 @@ func (w *WebSocketRouter) handleWebSocket(c *gin.Context) {
 
 	room := w.service.GetOrCreateRoom(roomId)
 	websockets.CreateClient(room, userId, c.Writer, c.Request)
+}
+
+func (h *WebSocketRouter) jwtAuthMiddleware(c *gin.Context) {
+	jwtToken := c.Query("access_token")
+
+	tokenIsValid := h.authService.TokenIsValid(jwtToken)
+
+	if !tokenIsValid {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.Abort()
+		return
+	}
+
+	c.Next()
 }

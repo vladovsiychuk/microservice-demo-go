@@ -71,7 +71,7 @@ func injectDependencies(
 	setupSubscribers(eventBus, eventHandler)
 
 	websocketService := websocketserver.NewService()
-	websocketHander := websocketserver.NewRouter(websocketService)
+	websocketHander := websocketserver.NewRouter(websocketService, authService)
 	websocketHander.RegisterRoutes(r)
 }
 

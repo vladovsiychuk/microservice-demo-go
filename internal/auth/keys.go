@@ -21,7 +21,7 @@ type KeysI interface {
 	GetSecondaryPulicKey() (*rsa.PublicKey, error)
 }
 
-var JWT_KEYS_DURATION = 10 * time.Second
+var JWT_KEYS_DURATION = 30 * time.Second
 
 var CreateKeys = func() KeysI {
 	privateKeyStr, publicKeyStr := generateRandomKeyStrs()
