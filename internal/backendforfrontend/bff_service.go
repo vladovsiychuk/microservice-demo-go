@@ -95,12 +95,12 @@ func (s *BffService) GetPostAggregate(postId uuid.UUID) (PostAggregateI, error) 
 func (s *BffService) CreatePostAggregate(post *post.Post) {
 	postAggregate, err := CreatePostAggregate(post)
 	if err != nil {
-		fmt.Printf("Error occured during the creation of post aggregate: " + err.Error())
+		fmt.Println("Error occured during the creation of post aggregate: " + err.Error())
 		return
 	}
 
 	if err := s.repository.Create(postAggregate); err != nil {
-		fmt.Printf("Error when saving to mongo db: " + err.Error())
+		fmt.Println("Error when saving to mongo db: " + err.Error())
 		return
 	}
 
@@ -110,13 +110,13 @@ func (s *BffService) CreatePostAggregate(post *post.Post) {
 func (s *BffService) UpdatePostAggregate(post *post.Post) {
 	postAgg, err := s.repository.FindById(post.Id)
 	if err != nil {
-		fmt.Printf("Error during post aggregate query: " + err.Error())
+		fmt.Println("Error during post aggregate query: " + err.Error())
 		return
 	}
 
 	postAgg.Update(post)
 	if err := s.repository.Update(postAgg); err != nil {
-		fmt.Printf("Error during post update: " + err.Error())
+		fmt.Println("Error during post update: " + err.Error())
 		return
 	}
 
@@ -126,13 +126,13 @@ func (s *BffService) UpdatePostAggregate(post *post.Post) {
 func (s *BffService) AddCommentToPostAggregate(comment *comment.Comment) {
 	postAgg, err := s.repository.FindById(comment.PostId)
 	if err != nil {
-		fmt.Printf("Error during post aggregate query: " + err.Error())
+		fmt.Println("Error during post aggregate query: " + err.Error())
 		return
 	}
 
 	postAgg.AddComment(comment)
 	if err := s.repository.Update(postAgg); err != nil {
-		fmt.Printf("Error during post update: " + err.Error())
+		fmt.Println("Error during post update: " + err.Error())
 		return
 	}
 
@@ -142,13 +142,13 @@ func (s *BffService) AddCommentToPostAggregate(comment *comment.Comment) {
 func (s *BffService) UpdateCommentInPostAggregate(comment *comment.Comment) {
 	postAgg, err := s.repository.FindById(comment.PostId)
 	if err != nil {
-		fmt.Printf("Error during post aggregate query: " + err.Error())
+		fmt.Println("Error during post aggregate query: " + err.Error())
 		return
 	}
 
 	postAgg.UpdateComment(comment)
 	if err := s.repository.Update(postAgg); err != nil {
-		fmt.Printf("Error during post update: " + err.Error())
+		fmt.Println("Error during post update: " + err.Error())
 		return
 	}
 

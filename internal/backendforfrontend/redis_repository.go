@@ -42,7 +42,7 @@ func (r *RedisRepository) FindByPostId(postId uuid.UUID) (PostAggregateI, error)
 func (r *RedisRepository) UpdateCache(postAgg PostAggregateI) {
 	postData, err := json.Marshal(postAgg)
 	if err != nil {
-		fmt.Printf("Error during post aggregate serialization: " + err.Error())
+		fmt.Println("Error during post aggregate serialization: " + err.Error())
 		return
 	}
 
@@ -50,6 +50,6 @@ func (r *RedisRepository) UpdateCache(postAgg PostAggregateI) {
 
 	err = r.redisClient.Set(context.Background(), postKey, postData, 0).Err()
 	if err != nil {
-		fmt.Printf("Something wrong with redis: " + err.Error())
+		fmt.Println("Something wrong with redis: " + err.Error())
 	}
 }
