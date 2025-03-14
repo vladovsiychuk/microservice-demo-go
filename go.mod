@@ -1,6 +1,6 @@
 module github.com/vladovsiychuk/microservice-demo-go
 
-go 1.23.2
+go 1.24.1
 
 require (
 	github.com/gin-gonic/gin v1.10.0
