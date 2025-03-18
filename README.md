@@ -26,6 +26,20 @@ This project is a **modular monolith** REST API for a social media platform wher
 
 Each module is designed to interact with the others through interfaces or event-bus.
 
+### Folder Structure
+```
+modular-monolith-go/
+├── cmd/ (Entry point)
+├── internal/ (Main application logic)
+│   ├── post/
+│   ├── comment/
+│   ├── backend-for-frontend/
+│   ├── websocket/
+│   ├── shared/ (shared interfaces and events)
+│   ├── tests/ (unit and integration tests)
+└── …
+```
+
 ## Usage  
 
 The application can be run locally or using **Docker Compose**.
