@@ -19,7 +19,7 @@ jobs:
         go-version: '1.24'
 
     - name: Run Tests
-      run: go test ./...
+      run: go test -tags=integration ./...
 
     - name: Log in to GitHub Container Registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin

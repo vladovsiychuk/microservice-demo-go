@@ -81,7 +81,7 @@ func TestPostgresRepository(t *testing.T) {
 		panic(err)
 	}
 
-	assert.Nil(t, savedPost)
+	assert.NotNil(t, savedPost)
 
 	/*
 	*
