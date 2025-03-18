@@ -44,3 +44,13 @@ The application can be run locally or using **Docker Compose**.
    docker-compose up
    ```
 
+## Testing
+1. Run only unit tests:
+   ```sh
+   go test ./...
+   ```
+2. Running unit and integration tests together (requires running **Docker Desktop**)
+   ```sh
+   go test -tags=integration ./...
+   ```
+
