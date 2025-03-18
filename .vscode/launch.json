@@ -9,7 +9,11 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceRoot}/cmd/main.go"
+            "program": "${workspaceRoot}/cmd/main.go",
+            "env": {
+                "GOOGLE_OAUTH_CLIENT_KEY": "",
+                "GOOGLE_OAUTH_SECRET": ""
+            },
         }
     ]
 }
