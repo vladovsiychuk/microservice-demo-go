@@ -9,6 +9,23 @@ This project is a **modular monolith** REST API for a social media platform wher
 - **Flexible Communication** – Modules interact via interfaces (synchronous) and an event bus using Go channels (asynchronous).  
 - **Scalability** – Designed to handle growing business requirements while maintaining performance.
 
+## Modules
+
+1. **Post Module**  
+   - It allows the creation and deletion of posts.  
+
+2. **Comment Module**  
+   - It enables the creation and deletion of comments on posts.
+
+3. **Backend for Frontend (BFF) Module**  
+   - This module handles asynchronous data operations.
+   - It is responsible for saving data and creating aggregates that enable fast fetching of data for the frontend, optimizing the performance of the user interface.  
+
+4. **WebSocket Module**  
+   - Handles WebSocket connections and requests.
+
+Each module is designed to interact with the others through interfaces or event-bus.
+
 ## Usage  
 
 The application can be run locally or using **Docker Compose**.
