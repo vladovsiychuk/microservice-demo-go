@@ -11,6 +11,8 @@ This project is a **modular monolith** REST API for a social media platform wher
 
 ## Modules
 
+![Architecture](docs/images/architecture.png)
+
 1. **Post Module**  
    - It allows the creation and deletion of posts.  
 
